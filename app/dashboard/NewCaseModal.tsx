@@ -46,7 +46,7 @@ export default function NewCaseModal({
       setSubject("");
       setDescription("");
       setPriority("");
-      
+
       // Call success callback
       onSuccess();
       onClose();

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!subject || !description) {
       return NextResponse.json(
         { error: "Subject and description are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       subject,
       description,
       session.user.id,
-      priority
+      priority,
     );
 
     return NextResponse.json({ ticket }, { status: 201 });
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating ticket:", error);
     return NextResponse.json(
       { error: "Failed to create ticket" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
