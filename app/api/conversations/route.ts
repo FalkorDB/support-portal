@@ -3,9 +3,9 @@
  * GET /api/conversations
  */
 
-import { NextResponse } from 'next/server';
-import { getSession } from '@/lib/session';
-import { fetchConversations } from '@/lib/chatwoot';
+import { NextResponse } from "next/server";
+import { getSession } from "@/lib/session";
+import { fetchConversations } from "@/lib/chatwoot";
 
 export async function GET() {
   try {
@@ -13,10 +13,7 @@ export async function GET() {
     const session = await getSession();
 
     if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Fetch conversations from Chatwoot
@@ -24,15 +21,15 @@ export async function GET() {
       session.accessToken,
       session.client,
       session.uid,
-      session.user.account_id
+      session.user.account_id,
     );
 
     return NextResponse.json(conversations);
   } catch (error) {
-    console.error('Failed to fetch conversations:', error);
+    console.error("Failed to fetch conversations:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch conversations' },
-      { status: 500 }
+      { error: "Failed to fetch conversations" },
+      { status: 500 },
     );
   }
 }

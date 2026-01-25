@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/session';
-import { fetchTicket } from '@/lib/zendesk';
-import CaseDetailClient from './CaseDetailClient';
-import { Message } from '@/types';
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
+import { fetchTicket } from "@/lib/zendesk";
+import CaseDetailClient from "./CaseDetailClient";
+import { Message } from "@/types";
 
 export default async function CaseDetailPage({
   params,
@@ -10,12 +10,12 @@ export default async function CaseDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  
+
   // Get session server-side
   const session = await getSession();
 
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
 
   // Fetch ticket and comments server-side
@@ -25,7 +25,7 @@ export default async function CaseDetailPage({
 
   try {
     const ticketData = await fetchTicket(parseInt(id));
-    
+
     // Transform Zendesk ticket to conversation format
     conversation = {
       id: ticketData.ticket.id,
@@ -33,7 +33,7 @@ export default async function CaseDetailPage({
       created_at: ticketData.ticket.created_at,
       updated_at: ticketData.ticket.updated_at,
     };
-    
+
     // Transform comments to messages
     type ZendeskComment = {
       id: number;
@@ -53,20 +53,25 @@ export default async function CaseDetailPage({
         id: comment.id,
         content: comment.body || comment.html_body,
         created_at: createdAt,
-        message_type: comment.public ? (comment.author_id === session.user.id ? 'outgoing' : 'incoming') : 'activity',
+        message_type: comment.public
+          ? comment.author_id === session.user.id
+            ? "outgoing"
+            : "incoming"
+          : "activity",
         sender: {
           id: comment.author_id,
-          name: 'User',
-          type: comment.author_id === session.user.id ? session.user.type : 'user',
+          name: "User",
+          type:
+            comment.author_id === session.user.id ? session.user.type : "user",
         },
       };
     });
   } catch {
-    error = 'Failed to load case details';
+    error = "Failed to load case details";
   }
 
   if (!conversation) {
-    redirect('/dashboard');
+    redirect("/dashboard");
   }
 
   return (

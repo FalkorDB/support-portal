@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import { useState, FormEvent, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useState, FormEvent, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    passwordConfirmation: '',
+    name: "",
+    email: "",
+    password: "",
+    passwordConfirmation: "",
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -35,22 +35,25 @@ function SignupForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || "Registration failed");
       }
 
       // Check if email confirmation is required
       if (data.requiresConfirmation) {
-        setSuccess(data.message || 'Account created! Please check your email to confirm your account.');
+        setSuccess(
+          data.message ||
+            "Account created! Please check your email to confirm your account.",
+        );
         // Don't redirect, show success message
         return;
       }
 
       // If no confirmation required, redirect to dashboard
-      const from = searchParams.get('from') || '/dashboard';
+      const from = searchParams.get("from") || "/dashboard";
       router.push(from);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -160,9 +163,11 @@ function SignupForm() {
             <div className="rounded-lg bg-green-50 p-4">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-green-800">{success}</h3>
+                  <h3 className="text-sm font-medium text-green-800">
+                    {success}
+                  </h3>
                   <p className="mt-2 text-sm text-green-700">
-                    You can close this page. Once confirmed, you can{' '}
+                    You can close this page. Once confirmed, you can{" "}
                     <Link href="/login" className="font-medium underline">
                       sign in here
                     </Link>
@@ -204,7 +209,7 @@ function SignupForm() {
                   Creating account...
                 </span>
               ) : (
-                'Sign up'
+                "Sign up"
               )}
             </button>
           </div>
@@ -212,8 +217,11 @@ function SignupForm() {
 
         <div className="text-center text-sm text-gray-600">
           <p>
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
               Sign in
             </Link>
           </p>
@@ -225,13 +233,15 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <p className="text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SignupForm />
     </Suspense>
   );

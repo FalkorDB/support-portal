@@ -11,6 +11,7 @@ This support portal is now configured to work with Zendesk. Follow these steps t
 ## Step 1: Get Your Zendesk Credentials
 
 ### 1.1 Find Your Subdomain
+
 Your subdomain is the first part of your Zendesk URL. For example, if your Zendesk URL is `https://mycompany.zendesk.com`, your subdomain is `mycompany`.
 
 ### 1.2 Get Your API Token
@@ -26,6 +27,7 @@ Your subdomain is the first part of your Zendesk URL. For example, if your Zende
 9. **Copy the API token** (you won't be able to see it again!)
 
 ### 1.3 Your Admin Email
+
 This is the email address of your Zendesk admin account.
 
 ## Step 2: Configure Environment Variables
@@ -51,12 +53,14 @@ The support portal will be available at http://localhost:3000
 ## How It Works
 
 ### For End Users:
+
 - Users can sign up with their email and create a Zendesk account
 - They can view their submitted tickets
 - They can add comments to their tickets
 - They can see all communication history
 
 ### For Agents:
+
 - Agents can log in with their Zendesk credentials
 - They can view tickets assigned to them
 - They can respond to tickets
@@ -64,17 +68,20 @@ The support portal will be available at http://localhost:3000
 ## Important Notes
 
 ### Authentication
+
 - This implementation uses basic authentication with email lookup
 - For production, you should implement proper OAuth or JWT authentication
 - Passwords are currently stored in user fields (not secure for production)
 
 ### Recommended Production Setup:
+
 1. Implement Zendesk SSO (Single Sign-On) with JWT
 2. Use Zendesk's Web Widget SDK for better integration
 3. Add proper password hashing and secure storage
 4. Implement rate limiting and security headers
 
 ### API Limitations:
+
 - Zendesk API has rate limits (check your plan)
 - The free trial has limited API requests
 - Some features require specific Zendesk plans
@@ -92,16 +99,19 @@ The support portal will be available at http://localhost:3000
 ## Troubleshooting
 
 ### "Authentication failed"
+
 - Check that your API token is correct
 - Verify your admin email is correct
 - Make sure token access is enabled in Zendesk
 
 ### "Failed to fetch tickets"
+
 - Verify your subdomain is correct (no https:// or .zendesk.com)
 - Check API token permissions
 - Ensure the user exists in Zendesk
 
 ### "User not found"
+
 - The email must exist in Zendesk
 - Users need to be created first through signup
 

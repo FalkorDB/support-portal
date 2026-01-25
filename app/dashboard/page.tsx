@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/session';
-import DashboardClient from './DashboardClient';
-import { fetchUserTickets } from '@/lib/zendesk';
-import { Conversation } from '@/types';
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
+import DashboardClient from "./DashboardClient";
+import { fetchUserTickets } from "@/lib/zendesk";
+import { Conversation } from "@/types";
 
 type ZendeskTicket = {
   id: number;
@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   const session = await getSession();
 
   if (!session) {
-    redirect('/login');
+    redirect("/login");
   }
 
   // Fetch tickets server-side
@@ -39,8 +39,8 @@ export default async function DashboardPage() {
       meta: {
         sender: {
           id: ticket.requester_id,
-          name: ticket.requester?.name || 'Unknown',
-          email: ticket.requester?.email || '',
+          name: ticket.requester?.name || "Unknown",
+          email: ticket.requester?.email || "",
         },
       },
       last_non_activity_message: {
@@ -48,7 +48,7 @@ export default async function DashboardPage() {
       },
     }));
   } catch {
-    error = 'Failed to load tickets';
+    error = "Failed to load tickets";
   }
 
   return (

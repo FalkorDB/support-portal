@@ -16,7 +16,7 @@ export default function CaseLoading() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className={`flex ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
               >
                 <div className="h-20 w-2/3 animate-pulse rounded-lg bg-white shadow-sm"></div>
               </div>

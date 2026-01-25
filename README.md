@@ -15,7 +15,9 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 - 🔄 User registration creates Zendesk end-user accounts automatically
 
 ## Tech Stack
- v4
+
+v4
+
 - **Language**: TypeScript
 - **Authentication**: Cookie-based sessions with Next.js middleware
 - **API Integration**: Zendesk REST API v2
@@ -24,7 +26,9 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 - **API Integration**: Chatwoot Client API and Platform API
 
 ## Prerequisites
+
 or 20+
+
 - A Zendesk account (any plan with API access)
 - Zendesk API token (see [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for instructions)lf-hosted)
 - Chatwoot account with API access
@@ -83,6 +87,7 @@ npm run dev
 ```
 
 ## API Routes
+
 Zendesk API calls are proxied through Next.js API routes for security:
 
 - `POST /api/auth/login` - Authenticate user via Zendesk user search
@@ -102,6 +107,7 @@ Zendesk API calls are proxied through Next.js API routes for security:
 - Basic authentication with Zendesk API (email/token)
 
 **⚠️ Production Security Notes:**
+
 - Current authentication uses basic email lookup (development only)
 - For production, implement Zendesk SSO/JWT authentication
 - Consider implementing proper password hashing (currently stored in user_fields)
@@ -129,6 +135,7 @@ npm run lint
 ## Deployment
 
 This application can be deployed to any platform that supports Next.js:
+
 ### Deployment Steps:
 
 1. Set up environment variables in your deployment platform:
@@ -148,6 +155,7 @@ This application can be deployed to any platform that supports Next.js:
 ### CI/CD
 
 GitHub Actions workflows are configured for:
+
 - **CI**: Automated testing, linting, and build verification on push/PR
 - **Deploy**: Automated deployment on push to main branch
 - **PR Checks**: Code quality validation, semantic PR titles, and pre-merge checks

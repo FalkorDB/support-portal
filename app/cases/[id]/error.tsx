@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function CaseError({
   error,
@@ -13,9 +13,11 @@ export default function CaseError({
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-sm">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Failed to load case</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Failed to load case
+          </h2>
           <p className="mt-2 text-sm text-gray-600">
-            {error.message || 'Something went wrong while loading this case'}
+            {error.message || "Something went wrong while loading this case"}
           </p>
           <div className="mt-6 flex flex-col gap-3">
             <button
