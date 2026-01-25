@@ -361,7 +361,12 @@ export async function createTicket(
 }
 
 /**
- * Update ticket status
+ * Update ticket status.
+ *
+ * @param {number} ticketId - The ID of the Zendesk ticket to update.
+ * @param {string} status - The new status to apply to the ticket.
+ * @returns {Promise<any>} A promise that resolves with the updated ticket object.
+ * @throws {Error} If the request to Zendesk fails or returns a non-OK response.
  */
 export async function updateTicketStatus(ticketId: number, status: string) {
   try {
