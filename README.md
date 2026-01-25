@@ -16,22 +16,18 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 
 ## Tech Stack
 
-v4
-
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS v4
 - **Language**: TypeScript
 - **Authentication**: Cookie-based sessions with Next.js middleware
 - **API Integration**: Zendesk REST API v2
-- **Runtime**: Node.js 18+ / 20+
-- **Authentication**: Cookie-based sessions with Next.js middleware
-- **API Integration**: Chatwoot Client API and Platform API
+- **Runtime**: Node.js 20+
 
 ## Prerequisites
 
-or 20+
-
+- Node.js 20+
 - A Zendesk account (any plan with API access)
-- Zendesk API token (see [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for instructions)lf-hosted)
-- Chatwoot account with API access
+- Zendesk API token (see [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for instructions)
 
 ## Environment Variables
 
@@ -88,14 +84,13 @@ npm run dev
 
 ## API Routes
 
-Zendesk API calls are proxied through Next.js API routes for security:
+All Zendesk API calls are proxied through Next.js API routes for security:
 
 - `POST /api/auth/login` - Authenticate user via Zendesk user search
 - `POST /api/auth/signup` - Register new user (creates Zendesk end-user)
 - `POST /api/auth/logout` - Log out user
 - `GET /api/conversations/[id]/messages` - Get ticket comments
 - `POST /api/conversations/[id]/messages` - Add comment to ticket
-- `POST /api/conversations/[id]/messages` - Send a message
 
 ## Security
 
@@ -139,15 +134,14 @@ This application can be deployed to any platform that supports Next.js:
 ### Deployment Steps:
 
 1. Set up environment variables in your deployment platform:
-   Documentation
-
-- [Zendesk Setup Guide](ZENDESK_SETUP.md) - Complete setup instructions
-- [Zendesk API Documentation](https://developer.zendesk.com/api-reference/ticketing/introduction/)
-- [Next.js Documentation](https://nextjs.org/doc
+   - `ZENDESK_SUBDOMAIN`
+   - `ZENDESK_EMAIL`
+   - `ZENDESK_API_TOKEN`
+   - `SESSION_SECRET`
 
 2. For GitHub Actions deployment, add these as repository secrets
 
-3. Ensure Node.js 18+ or 20+ is configured
+3. Ensure Node.js 20+ is configured
 
 4. Build command: `npm run build`
 5. Start command: `npm start`
@@ -160,17 +154,12 @@ GitHub Actions workflows are configured for:
 - **Deploy**: Automated deployment on push to main branch
 - **PR Checks**: Code quality validation, semantic PR titles, and pre-merge checks
 - **Dependabot**: Automated dependency updates
-- **Vercel** (recommended)
-- **Netlify**
-- **Docker**
-- **Any Node.js hosting**
 
-Make sure to set up environment variables in your deployment platform.
+## Documentation
 
-## Chatwoot API Documentation
-
-- [Client APIs](https://developers.chatwoot.com/contributing-guide/chatwoot-apis#client-apis)
-- [Platform APIs](https://developers.chatwoot.com/contributing-guide/chatwoot-platform-apis)
+- [Zendesk Setup Guide](ZENDESK_SETUP.md) - Complete setup instructions
+- [Zendesk API Documentation](https://developer.zendesk.com/api-reference/ticketing/introduction/)
+- [Next.js Documentation](https://nextjs.org/docs)
 
 ## License
 
