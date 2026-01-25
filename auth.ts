@@ -61,12 +61,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Initial sign in
       if (user) {
         // Safely convert user.id to number with validation
-        const userId = typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
+        const userId =
+          typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
         if (isNaN(userId)) {
           console.error("Invalid user ID:", user.id);
           return token;
         }
-        
+
         token.id = userId;
         token.role = user.role;
         token.type = user.type;
@@ -93,7 +94,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (token.accessToken) {
-        (session as { accessToken?: string }).accessToken = token.accessToken as string;
+        (session as { accessToken?: string }).accessToken =
+          token.accessToken as string;
       }
 
       return session;

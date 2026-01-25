@@ -15,13 +15,13 @@ const authRoutes = ["/login", "/signup"];
 
 export default auth(function middleware(req) {
   const { pathname } = req.nextUrl;
-  
+
   // Check for NextAuth session
   const nextAuthSession = req.auth;
-  
+
   // Check for legacy session cookie
   const sessionCookie = req.cookies.get("support_session");
-  
+
   // User is authenticated if either session exists
   const isAuthenticated = !!(nextAuthSession || sessionCookie?.value);
 

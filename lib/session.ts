@@ -40,7 +40,7 @@ export async function setSession(sessionData: SessionData) {
 export async function getSession(): Promise<SessionData | null> {
   // First, check for NextAuth session
   const nextAuthSession = await auth();
-  
+
   if (nextAuthSession?.user) {
     // Convert NextAuth session to our SessionData format
     // Note: For OAuth users, we use a placeholder token since they don't need

@@ -10,7 +10,7 @@ export async function POST() {
   try {
     // Clear NextAuth session
     await signOut({ redirect: false });
-    
+
     // Also clear legacy session cookie if it exists
     await clearSession();
 
