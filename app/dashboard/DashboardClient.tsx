@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { signOut } from "next-auth/react";
 import { Conversation, User } from "@/types";
 import { formatDate, getStatusColor } from "@/lib/utils";
 import NewCaseModal from "./NewCaseModal";
@@ -28,9 +30,7 @@ export default function DashboardClient({
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
-      router.refresh();
+      await signOut({ callbackUrl: "/login", redirect: true });
     } catch (err) {
       console.error("Logout failed:", err);
       setIsLoggingOut(false);
@@ -105,9 +105,11 @@ export default function DashboardClient({
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img
+              <Image
                 src="/falkordb-logo.svg"
                 alt="FalkorDB"
+                width={32}
+                height={32}
                 className="h-8 w-auto"
               />
               <div>

@@ -16,6 +16,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { updateTicketStatus } from "@/lib/zendesk";
+import {
+  updateTicketStatusSchema,
+  ticketIdSchema,
+  validateAndSanitize,
+} from "@/lib/validation";
+import {
+  checkRateLimit,
+  getRateLimitIdentifier,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 export async function PATCH(
   request: NextRequest,
@@ -23,22 +33,12 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { status } = body;
 
-    // Validate input
-    if (!status || typeof status !== "string") {
+    // Validate ticket ID
+    const idValidation = validateAndSanitize(ticketIdSchema, id);
+    if (!idValidation.success) {
       return NextResponse.json(
-        { error: "Status is required" },
-        { status: 400 },
-      );
-    }
-
-    // Validate status value
-    const validStatuses = ["new", "open", "pending", "solved", "closed"];
-    if (!validStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status value" },
+        { error: "Invalid ticket ID" },
         { status: 400 },
       );
     }
@@ -49,6 +49,34 @@ export async function PATCH(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Check rate limit
+    const rateLimitId = getRateLimitIdentifier(request, session.user.id);
+    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.general);
+
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: { "Retry-After": retryAfter.toString() },
+        },
+      );
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validation = validateAndSanitize(updateTicketStatusSchema, body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 },
+      );
+    }
+
+    const { status } = validation.data;
 
     // Update ticket status in Zendesk
     const ticket = await updateTicketStatus(parseInt(id), status);

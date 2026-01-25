@@ -2,7 +2,6 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 
@@ -24,27 +23,19 @@ function LoginForm() {
             Support Portal
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in with your Google account to view your support cases
+            Sign in or create an account with Google
           </p>
         </div>
 
-        {/* Google Sign-In Option */}
+        {/* Google Sign-In */}
         <div className="mt-8">
           <GoogleSignInButton
             callbackUrl={searchParams.get("from") || "/dashboard"}
             text="Sign in with Google"
           />
-        </div>
-
-        <div className="text-center text-sm text-gray-600">
-          <p>
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              Sign up
-            </Link>
+          
+          <p className="mt-4 text-center text-xs text-gray-500">
+            New users will be automatically registered on first sign-in
           </p>
         </div>
       </div>

@@ -7,6 +7,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { fetchTicket, addComment } from "@/lib/zendesk";
+import {
+  createMessageSchema,
+  ticketIdSchema,
+  validateAndSanitize,
+} from "@/lib/validation";
+import {
+  checkRateLimit,
+  getRateLimitIdentifier,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 export async function GET(
   request: NextRequest,
@@ -15,11 +25,35 @@ export async function GET(
   try {
     const { id } = await params;
 
+    // Validate ticket ID
+    const idValidation = validateAndSanitize(ticketIdSchema, id);
+    if (!idValidation.success) {
+      return NextResponse.json(
+        { error: "Invalid ticket ID" },
+        { status: 400 },
+      );
+    }
+
     // Get session
     const session = await getSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check rate limit
+    const rateLimitId = getRateLimitIdentifier(request, session.user.id);
+    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.general);
+
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: { "Retry-After": retryAfter.toString() },
+        },
+      );
     }
 
     // Fetch ticket comments from Zendesk
@@ -74,17 +108,12 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { content } = body;
 
-    // Validate input
-    if (
-      !content ||
-      typeof content !== "string" ||
-      content.trim().length === 0
-    ) {
+    // Validate ticket ID
+    const idValidation = validateAndSanitize(ticketIdSchema, id);
+    if (!idValidation.success) {
       return NextResponse.json(
-        { error: "Message content is required" },
+        { error: "Invalid ticket ID" },
         { status: 400 },
       );
     }
@@ -96,10 +125,38 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check rate limit
+    const rateLimitId = getRateLimitIdentifier(request, session.user.id);
+    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.sendMessage);
+
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);
+      return NextResponse.json(
+        { error: "Too many requests. Please slow down." },
+        {
+          status: 429,
+          headers: { "Retry-After": retryAfter.toString() },
+        },
+      );
+    }
+
+    // Parse and validate request body
+    const body = await request.json();
+    const validation = validateAndSanitize(createMessageSchema, body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 },
+      );
+    }
+
+    const { content } = validation.data;
+
     // Add comment to Zendesk ticket
     const ticket = await addComment(
       parseInt(id),
-      content.trim(),
+      content,
       session.user.id,
       true,
     );
@@ -107,7 +164,7 @@ export async function POST(
     // Return the ticket data
     return NextResponse.json({
       id: ticket.id,
-      content: content.trim(),
+      content: content,
       created_at: Date.now() / 1000,
       message_type: "outgoing",
       sender: {

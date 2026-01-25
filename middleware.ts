@@ -1,7 +1,6 @@
 /**
  * Middleware for route protection
  * Protects authenticated routes and redirects to login if not authenticated
- * Supports both NextAuth sessions and legacy cookie-based sessions
  */
 
 import { NextResponse } from "next/server";
@@ -11,7 +10,7 @@ import { auth } from "@/auth";
 const protectedRoutes = ["/dashboard", "/cases"];
 
 // Routes that should redirect to dashboard if already authenticated
-const authRoutes = ["/login", "/signup"];
+const authRoutes = ["/login"];
 
 export default auth(function middleware(req) {
   const { pathname } = req.nextUrl;
@@ -19,11 +18,8 @@ export default auth(function middleware(req) {
   // Check for NextAuth session
   const nextAuthSession = req.auth;
 
-  // Check for legacy session cookie
-  const sessionCookie = req.cookies.get("support_session");
-
-  // User is authenticated if either session exists
-  const isAuthenticated = !!(nextAuthSession || sessionCookie?.value);
+  // User is authenticated if session exists
+  const isAuthenticated = !!nextAuthSession;
 
   // Check if the current route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
