@@ -26,6 +26,7 @@ export default function CaseDetailClient({
   const [sendError, setSendError] = useState("");
   const [currentStatus, setCurrentStatus] = useState(conversation.status);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Use `_user` in a no-op to avoid unused variable lint warnings
@@ -39,7 +40,10 @@ export default function CaseDetailClient({
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === currentStatus || isUpdatingStatus) return;
 
+    const previousStatus = currentStatus;
     setIsUpdatingStatus(true);
+    setStatusError("");
+    setCurrentStatus(newStatus as typeof currentStatus); // Optimistically update
 
     try {
       const response = await fetch(`/api/conversations/${conversation.id}/status`, {
@@ -62,8 +66,8 @@ export default function CaseDetailClient({
     } catch (err) {
       console.error("Status update error:", err);
       // Revert to previous status on error
-      setCurrentStatus(currentStatus);
-      alert("Failed to update status. Please try again.");
+      setCurrentStatus(previousStatus);
+      setStatusError("Failed to update status. Please try again.");
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -173,6 +177,13 @@ export default function CaseDetailClient({
               </svg>
             </div>
           </div>
+          
+          {/* Status Update Error */}
+          {statusError && (
+            <div className="mt-3 rounded-lg bg-red-50 p-3">
+              <p className="text-sm text-red-800">{statusError}</p>
+            </div>
+          )}
         </div>
       </header>
 
