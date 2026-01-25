@@ -1,6 +1,16 @@
 /**
  * Ticket Status API Route
- * PATCH /api/conversations/[id]/status - Update ticket status
+ * PATCH /api/conversations/[id]/status - Update ticket status.
+ *
+ * @param {NextRequest} request - The incoming Next.js request containing a JSON body
+ * with a `status` field specifying the new ticket status.
+ * @param {{ params: Promise<{ id: string }> }} params - Route context containing
+ * a promise that resolves to the URL parameters, including the ticket `id`.
+ * @returns {Promise<NextResponse>} A JSON response. On success (200), returns the
+ * updated ticket `{ id, status, updated_at }`. On error, returns:
+ * - 400 if `status` is missing or invalid,
+ * - 401 if the user is unauthorized,
+ * - 500 if updating the ticket status fails on the server.
  */
 
 import { NextRequest, NextResponse } from "next/server";
