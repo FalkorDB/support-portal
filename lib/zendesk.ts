@@ -363,10 +363,7 @@ export async function createTicket(
 /**
  * Update ticket status
  */
-export async function updateTicketStatus(
-  ticketId: number,
-  status: string,
-) {
+export async function updateTicketStatus(ticketId: number, status: string) {
   try {
     const response = await fetch(
       `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`,

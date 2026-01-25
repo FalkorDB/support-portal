@@ -46,13 +46,16 @@ export default function CaseDetailClient({
     setCurrentStatus(newStatus as typeof currentStatus); // Optimistically update
 
     try {
-      const response = await fetch(`/api/conversations/${conversation.id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `/api/conversations/${conversation.id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: newStatus }),
         },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update status");
@@ -177,7 +180,7 @@ export default function CaseDetailClient({
               </svg>
             </div>
           </div>
-          
+
           {/* Status Update Error */}
           {statusError && (
             <div className="mt-3 rounded-lg bg-red-50 p-3">
