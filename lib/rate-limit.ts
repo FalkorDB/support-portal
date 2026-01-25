@@ -11,14 +11,17 @@ type RateLimitStore = {
 const rateLimitMap = new Map<string, RateLimitStore>();
 
 // Clean up expired entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of rateLimitMap.entries()) {
-    if (value.resetTime < now) {
-      rateLimitMap.delete(key);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, value] of rateLimitMap.entries()) {
+      if (value.resetTime < now) {
+        rateLimitMap.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000);
+  },
+  5 * 60 * 1000,
+);
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds

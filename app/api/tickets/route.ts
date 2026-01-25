@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { createTicket } from "@/lib/zendesk";
-import {
-  createTicketSchema,
-  validateAndSanitize,
-} from "@/lib/validation";
+import { createTicketSchema, validateAndSanitize } from "@/lib/validation";
 import {
   checkRateLimit,
   getRateLimitIdentifier,
@@ -44,10 +41,7 @@ export async function POST(request: NextRequest) {
     const validation = validateAndSanitize(createTicketSchema, body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { subject, description, priority } = validation.data;

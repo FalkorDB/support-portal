@@ -33,7 +33,7 @@ function LoginForm() {
             callbackUrl={searchParams.get("from") || "/dashboard"}
             text="Sign in with Google"
           />
-          
+
           <p className="mt-4 text-center text-xs text-gray-500">
             New users will be automatically registered on first sign-in
           </p>

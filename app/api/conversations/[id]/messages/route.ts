@@ -28,10 +28,7 @@ export async function GET(
     // Validate ticket ID
     const idValidation = validateAndSanitize(ticketIdSchema, id);
     if (!idValidation.success) {
-      return NextResponse.json(
-        { error: "Invalid ticket ID" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
     }
 
     // Get session
@@ -112,10 +109,7 @@ export async function POST(
     // Validate ticket ID
     const idValidation = validateAndSanitize(ticketIdSchema, id);
     if (!idValidation.success) {
-      return NextResponse.json(
-        { error: "Invalid ticket ID" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
     }
 
     // Get session
@@ -145,10 +139,7 @@ export async function POST(
     const validation = validateAndSanitize(createMessageSchema, body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { content } = validation.data;

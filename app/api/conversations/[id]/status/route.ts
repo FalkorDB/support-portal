@@ -37,10 +37,7 @@ export async function PATCH(
     // Validate ticket ID
     const idValidation = validateAndSanitize(ticketIdSchema, id);
     if (!idValidation.success) {
-      return NextResponse.json(
-        { error: "Invalid ticket ID" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
     }
 
     // Get session
@@ -70,10 +67,7 @@ export async function PATCH(
     const validation = validateAndSanitize(updateTicketStatusSchema, body);
 
     if (!validation.success) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const { status } = validation.data;
