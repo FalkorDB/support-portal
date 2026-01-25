@@ -162,7 +162,7 @@ export default function NewCaseModal({
                   className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   disabled={isSubmitting}
                 >
-                  <option value="">-</option>
+                  <option value="">-- Select priority --</option>
                   <option value="low">Low</option>
                   <option value="normal">Normal</option>
                   <option value="high">High</option>
