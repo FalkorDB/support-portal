@@ -359,3 +359,42 @@ export async function createTicket(
     throw error;
   }
 }
+
+/**
+ * Update ticket status.
+ *
+ * @param {number} ticketId - The ID of the Zendesk ticket to update.
+ * @param {string} status - The new status to apply to the ticket.
+ * @returns {Promise<any>} A promise that resolves with the updated ticket object.
+ * @throws {Error} If the request to Zendesk fails or returns a non-OK response.
+ */
+export async function updateTicketStatus(ticketId: number, status: string) {
+  try {
+    const response = await fetch(
+      `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ticket: {
+            status,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to update ticket status");
+    }
+
+    const data = await response.json();
+    return data.ticket;
+  } catch (error) {
+    console.error("Zendesk update ticket status error:", error);
+    throw error;
+  }
+}
