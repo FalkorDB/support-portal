@@ -25,7 +25,10 @@ function getAuthHeader(): string {
 
 /**
  * Convert Zendesk role to user type
- * In this application, 'type' is the same as 'role' for consistency
+ * Currently, 'type' is the same as 'role' for simplicity and consistency.
+ * This helper function exists to centralize the logic in case future
+ * requirements need different type mapping (e.g., grouping multiple roles
+ * into broader types).
  */
 function getUserType(role: string): string {
   return role;
@@ -124,7 +127,7 @@ export async function registerUser(
         email: data.user.email,
         name: data.user.name,
         role: data.user.role,
-        type: "end-user",
+        type: getUserType(data.user.role),
       },
       access_token: ZENDESK_API_TOKEN,
       requiresConfirmation: false,
