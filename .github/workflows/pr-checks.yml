@@ -1,0 +1,90 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check PR title
+      uses: amannn/action-semantic-pull-request@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        types: |
+          feat
+          fix
+          docs
+          style
+          refactor
+          perf
+          test
+          build
+          ci
+          chore
+          revert
+
+    - name: Check for merge conflicts
+      run: |
+        git fetch origin ${{ github.base_ref }}
+        if git merge-base --is-ancestor HEAD origin/${{ github.base_ref }}; then
+          echo "No merge conflicts detected"
+        else
+          echo "Branch is not up to date with base branch"
+          exit 1
+        fi
+
+    - name: Check file size
+      run: |
+        large_files=$(find . -type f -size +5M -not -path "*/node_modules/*" -not -path "*/.next/*" -not -path "*/.git/*")
+        if [ -n "$large_files" ]; then
+          echo "Large files detected (>5MB):"
+          echo "$large_files"
+          echo "Please use Git LFS for large files or exclude them"
+          exit 1
+        fi
+        echo "No large files detected"
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check code formatting
+      run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+
+    - name: Check for console statements
+      run: |
+        if grep -r "console\\.log" app lib --include="*.ts" --include="*.tsx" --exclude-dir=node_modules; then
+          echo "Found console.log statements. Please remove them before merging."
+          exit 1
+        fi
+        echo "No console.log statements found"
+
+    - name: Check for TODO comments
+      run: |
+        todos=$(grep -r "TODO\|FIXME" app lib --include="*.ts" --include="*.tsx" --exclude-dir=node_modules || true)
+        if [ -n "$todos" ]; then
+          echo "Found TODO/FIXME comments:"
+          echo "$todos"
+          echo "Please create issues for these items"
+        fi
