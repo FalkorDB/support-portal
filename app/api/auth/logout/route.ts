@@ -3,20 +3,23 @@
  * POST /api/auth/logout
  */
 
-import { NextResponse } from "next/server";
+import { signOut } from "@/auth";
 import { clearSession } from "@/lib/session";
 
 export async function POST() {
   try {
-    // Clear session cookie
+    // Clear NextAuth session
+    await signOut({ redirect: false });
+    
+    // Also clear legacy session cookie if it exists
     await clearSession();
 
-    return NextResponse.json({
+    return Response.json({
       success: true,
       message: "Logged out successfully",
     });
   } catch (error) {
     console.error("Logout error:", error);
-    return NextResponse.json({ error: "Failed to logout" }, { status: 500 });
+    return Response.json({ error: "Failed to logout" }, { status: 500 });
   }
 }
