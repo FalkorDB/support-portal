@@ -373,7 +373,7 @@ export async function updateTicketStatus(ticketId: number, status: string) {
     const response = await fetch(
       `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`,
       {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           Authorization: getAuthHeader(),
           "Content-Type": "application/json",
