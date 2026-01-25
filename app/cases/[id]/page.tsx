@@ -47,7 +47,7 @@ export default async function CaseDetailPage({
     messages = ticketData.comments.map((comment: ZendeskComment) => {
       const createdAt = comment.created_at
         ? Math.floor(new Date(comment.created_at).getTime() / 1000)
-        : Math.floor(Date.now() / 1000);
+        : 0; // deterministic fallback (avoid calling Date.now in render)
 
       return {
         id: comment.id,
