@@ -13,7 +13,6 @@ export default function NewCaseModal({
   onClose,
   onSuccess,
 }: NewCaseModalProps) {
-  const [cc, setCc] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("");
@@ -44,7 +43,6 @@ export default function NewCaseModal({
       }
 
       // Reset form
-      setCc("");
       setSubject("");
       setDescription("");
       setPriority("");
@@ -106,24 +104,6 @@ export default function NewCaseModal({
           {/* Form */}
           <form onSubmit={handleSubmit} className="px-6 py-6">
             <div className="space-y-6">
-              {/* CC Field */}
-              <div>
-                <label
-                  htmlFor="cc"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  CC
-                </label>
-                <input
-                  type="text"
-                  id="cc"
-                  value={cc}
-                  onChange={(e) => setCc(e.target.value)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  disabled={isSubmitting}
-                />
-              </div>
-
               {/* Subject Field */}
               <div>
                 <label
