@@ -5,26 +5,6 @@
 
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import type { User as NextAuthUser } from "next-auth";
-import type { User } from "@/types";
-
-// Extend NextAuth types to include our custom user properties
-declare module "next-auth" {
-  interface Session {
-    user: User & {
-      id: number;
-      role?: string;
-      type: string;
-    };
-    accessToken?: string;
-  }
-
-  interface User extends NextAuthUser {
-    id: number;
-    role?: string;
-    type: string;
-  }
-}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -45,7 +25,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       // When a user signs in with Google, we need to:
       // 1. Check if they exist in Zendesk
       // 2. If not, create them as an end-user
@@ -77,7 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in
       if (user) {
-        token.id = user.id;
+        token.id = Number(user.id);
         token.role = user.role;
         token.type = user.type;
       }
@@ -90,18 +70,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Add custom fields to session
-      if (session.user) {
-        session.user.id = token.id as number;
-        session.user.role = token.role as string;
-        session.user.type = token.type as string;
+      // Add custom fields to session - using type assertion to work around NextAuth type limitations
+      const extendedSession = session as typeof session & {
+        user: typeof session.user & {
+          id: number;
+          role?: string;
+          type: string;
+        };
+        accessToken?: string;
+      };
+
+      if (token.id !== undefined) {
+        extendedSession.user.id = token.id;
+      }
+      if (token.role !== undefined) {
+        extendedSession.user.role = token.role;
+      }
+      if (token.type !== undefined) {
+        extendedSession.user.type = token.type;
       }
 
       if (token.accessToken) {
-        session.accessToken = token.accessToken as string;
+        extendedSession.accessToken = token.accessToken as string;
       }
 
-      return session;
+      return extendedSession;
     },
   },
   session: {
