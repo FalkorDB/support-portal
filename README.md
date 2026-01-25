@@ -1,4 +1,4 @@
-# Support Portal
+# FalkorDB Support Portal
 
 A modern customer-facing support portal that integrates with Zendesk to allow users to view and manage their support tickets. Users can authenticate, view their ticket history, filter by status, and reply to tickets directly from the portal.
 

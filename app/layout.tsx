@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Support Portal",
+  title: "FalkorDB Support Portal",
   description: "View and manage your support cases",
 };
 

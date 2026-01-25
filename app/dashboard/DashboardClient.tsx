@@ -97,13 +97,20 @@ export default function DashboardClient({
       <header className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+            <div className="flex items-center gap-4">
+              <img
+                src="/falkordb-logo.svg"
+                alt="FalkorDB"
+                className="h-8 w-auto"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
                 Support Cases
               </h1>
               <p className="mt-1 text-sm text-gray-500">
                 Welcome back, {user.name || user.email}
               </p>
+            </div>
             </div>
             <button
               onClick={handleLogout}

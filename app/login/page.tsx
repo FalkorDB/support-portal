@@ -3,6 +3,7 @@
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 function LoginForm() {
   const router = useRouter();
@@ -47,7 +48,15 @@ function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div>
+
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+            <Image
+              className="mx-auto h-12 w-auto mb-4"
+              src="/falkordb-logo.svg"
+              alt="FalkorDB"
+              width={48}
+              height={48}
+            />
             Support Portal
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
