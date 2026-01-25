@@ -24,6 +24,8 @@ export default function CaseDetailClient({
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [currentStatus, setCurrentStatus] = useState(conversation.status);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Use `_user` in a no-op to avoid unused variable lint warnings
@@ -33,6 +35,39 @@ export default function CaseDetailClient({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === currentStatus || isUpdatingStatus) return;
+
+    setIsUpdatingStatus(true);
+
+    try {
+      const response = await fetch(`/api/conversations/${conversation.id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      const data = await response.json();
+      setCurrentStatus(data.status);
+
+      // Refresh to get updated conversation
+      router.refresh();
+    } catch (err) {
+      console.error("Status update error:", err);
+      // Revert to previous status on error
+      setCurrentStatus(currentStatus);
+      alert("Failed to update status. Please try again.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
 
   const handleSendMessage = async (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
@@ -108,13 +143,35 @@ export default function CaseDetailClient({
                 </p>
               </div>
             </div>
-            <span
-              className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
-                conversation.status,
-              )}`}
-            >
-              {conversation.status}
-            </span>
+            <div className="relative">
+              <select
+                value={currentStatus}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                disabled={isUpdatingStatus}
+                className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
+                  currentStatus,
+                )} cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                <option value="new">new</option>
+                <option value="open">open</option>
+                <option value="pending">pending</option>
+                <option value="solved">solved</option>
+                <option value="closed">closed</option>
+              </select>
+              <svg
+                className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           </div>
         </div>
       </header>
