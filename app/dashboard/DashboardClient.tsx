@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Conversation, User } from '@/types';
-import { formatDate, getStatusColor } from '@/lib/utils';
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Conversation, User } from "@/types";
+import { formatDate, getStatusColor } from "@/lib/utils";
 
 interface DashboardClientProps {
   initialConversations: Conversation[];
@@ -19,18 +19,18 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const router = useRouter();
   const [conversations] = useState<Conversation[]>(initialConversations);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
       router.refresh();
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
       setIsLoggingOut(false);
     }
   };
@@ -39,13 +39,16 @@ export default function DashboardClient({
   const filteredConversations = useMemo(() => {
     return conversations.filter((conversation) => {
       // Status filter (map 'resolved' to Zendesk's 'solved' and 'closed')
-      if (statusFilter !== 'all') {
-        if (statusFilter === 'resolved') {
-          if (conversation.status !== 'solved' && conversation.status !== 'closed') {
+      if (statusFilter !== "all") {
+        if (statusFilter === "resolved") {
+          if (
+            conversation.status !== "solved" &&
+            conversation.status !== "closed"
+          ) {
             return false;
           }
-        } else if (statusFilter === 'open') {
-          if (conversation.status !== 'open' && conversation.status !== 'new') {
+        } else if (statusFilter === "open") {
+          if (conversation.status !== "open" && conversation.status !== "new") {
             return false;
           }
         } else if (conversation.status !== statusFilter) {
@@ -57,13 +60,10 @@ export default function DashboardClient({
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const lastMessage = conversation.messages?.[0];
-        const messageContent = lastMessage?.content?.toLowerCase() || '';
+        const messageContent = lastMessage?.content?.toLowerCase() || "";
         const conversationId = conversation.id.toString();
 
-        return (
-          conversationId.includes(query) ||
-          messageContent.includes(query)
-        );
+        return conversationId.includes(query) || messageContent.includes(query);
       }
 
       return true;
@@ -77,17 +77,17 @@ export default function DashboardClient({
       pending: 0,
       resolved: 0,
     };
-    
+
     conversations.forEach((conv) => {
-      if (conv.status === 'open' || conv.status === 'new') {
+      if (conv.status === "open" || conv.status === "new") {
         counts.open++;
-      } else if (conv.status === 'pending') {
+      } else if (conv.status === "pending") {
         counts.pending++;
-      } else if (conv.status === 'solved' || conv.status === 'closed') {
+      } else if (conv.status === "solved" || conv.status === "closed") {
         counts.resolved++;
       }
     });
-    
+
     return counts;
   }, [conversations]);
 
@@ -97,18 +97,27 @@ export default function DashboardClient({
       <header className="bg-white shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Support Cases</h1>
+            <div className="flex items-center gap-4">
+              <img
+                src="/falkordb-logo.svg"
+                alt="FalkorDB"
+                className="h-8 w-auto"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                Support Cases
+              </h1>
               <p className="mt-1 text-sm text-gray-500">
                 Welcome back, {user.name || user.email}
               </p>
+            </div>
             </div>
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
               className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50"
             >
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
+              {isLoggingOut ? "Logging out..." : "Logout"}
             </button>
           </div>
         </div>
@@ -179,15 +188,15 @@ export default function DashboardClient({
           <div className="rounded-lg bg-white p-12 text-center shadow-sm">
             <p className="text-gray-500">
               {conversations.length === 0
-                ? 'No support cases found.'
-                : 'No cases match your filters.'}
+                ? "No support cases found."
+                : "No cases match your filters."}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredConversations.map((conversation) => {
               const lastMessage = conversation.messages?.[0];
-              const messagePreview = lastMessage?.content || 'No messages yet';
+              const messagePreview = lastMessage?.content || "No messages yet";
 
               return (
                 <Link
@@ -203,7 +212,7 @@ export default function DashboardClient({
                         </h3>
                         <span
                           className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${getStatusColor(
-                            conversation.status
+                            conversation.status,
                           )}`}
                         >
                           {conversation.status}
@@ -213,13 +222,19 @@ export default function DashboardClient({
                         {messagePreview}
                       </p>
                       <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-                        <span>Created {formatDate(conversation.created_at)}</span>
+                        <span>
+                          Created {formatDate(conversation.created_at)}
+                        </span>
                         <span>•</span>
-                        <span>Updated {formatDate(conversation.updated_at)}</span>
+                        <span>
+                          Updated {formatDate(conversation.updated_at)}
+                        </span>
                         {conversation.meta?.assignee && (
                           <>
                             <span>•</span>
-                            <span>Assigned to {conversation.meta.assignee.name}</span>
+                            <span>
+                              Assigned to {conversation.meta.assignee.name}
+                            </span>
                           </>
                         )}
                       </div>

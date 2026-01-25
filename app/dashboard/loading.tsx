@@ -10,7 +10,10 @@ export default function DashboardLoading() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-lg bg-white shadow-sm"></div>
+            <div
+              key={i}
+              className="h-24 animate-pulse rounded-lg bg-white shadow-sm"
+            ></div>
           ))}
         </div>
 
@@ -21,7 +24,10 @@ export default function DashboardLoading() {
 
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-lg bg-white shadow-sm"></div>
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-lg bg-white shadow-sm"
+            ></div>
           ))}
         </div>
       </main>

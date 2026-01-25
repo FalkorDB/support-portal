@@ -5,6 +5,7 @@ export interface User {
   name: string;
   role?: string;
   type: string; // 'end-user' or 'agent'
+  account_id?: number;
 }
 
 export interface AuthResponse {
@@ -16,7 +17,14 @@ export interface AuthResponse {
 // Conversation/Ticket Types
 export interface Conversation {
   id: number;
-  status: 'new' | 'open' | 'pending' | 'solved' | 'closed' | 'resolved' | 'snoozed';
+  status:
+    | "new"
+    | "open"
+    | "pending"
+    | "solved"
+    | "closed"
+    | "resolved"
+    | "snoozed";
   created_at: string;
   updated_at: string;
   messages?: Message[];
@@ -37,7 +45,7 @@ export interface Contact {
   phone_number?: string;
   avatar?: string;
   custom_attributes?: {
-    [key: string]: any;
+    [key: string]: Record<string, unknown> | string | number | boolean | null;
   };
 }
 
@@ -45,13 +53,26 @@ export interface Contact {
 export interface Message {
   id: number;
   content: string;
-  message_type: 'incoming' | 'outgoing' | 'activity' | 'template' | number | string;
+  message_type:
+    | "incoming"
+    | "outgoing"
+    | "activity"
+    | "template"
+    | number
+    | string;
   created_at: string | number;
   private?: boolean;
   source_id?: string;
-  content_type?: 'text' | 'input_text' | 'input_textarea' | 'input_email' | 'input_select' | 'cards' | 'form';
+  content_type?:
+    | "text"
+    | "input_text"
+    | "input_textarea"
+    | "input_email"
+    | "input_select"
+    | "cards"
+    | "form";
   content_attributes?: {
-    [key: string]: any;
+    [key: string]: Record<string, unknown> | string | number | boolean | null;
   };
   sender?: {
     id: number;
@@ -68,7 +89,7 @@ export interface Message {
 export interface Attachment {
   id: number;
   message_id: number;
-  file_type: 'image' | 'video' | 'audio' | 'file';
+  file_type: "image" | "video" | "audio" | "file";
   account_id: number;
   file_url: string;
   thumb_url?: string;

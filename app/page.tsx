@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function Home() {
   // Redirect to dashboard (will be caught by middleware if not authenticated)
-  redirect('/dashboard');
+  redirect("/dashboard");
 }

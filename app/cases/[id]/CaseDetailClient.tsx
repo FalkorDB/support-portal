@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Conversation, Message, User } from '@/types';
-import { formatDateTime, getStatusColor } from '@/lib/utils';
+import { useState, useRef, useEffect, FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Conversation, Message, User } from "@/types";
+import { formatDateTime, getStatusColor } from "@/lib/utils";
 
 interface CaseDetailClientProps {
   conversation: Conversation;
@@ -16,19 +16,22 @@ interface CaseDetailClientProps {
 export default function CaseDetailClient({
   conversation,
   initialMessages,
-  user,
+  user: _user,
   error,
 }: CaseDetailClientProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [sendError, setSendError] = useState('');
+  const [sendError, setSendError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use `_user` in a no-op to avoid unused variable lint warnings
+  void _user;
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSendMessage = async (e?: FormEvent<HTMLFormElement>) => {
@@ -37,35 +40,35 @@ export default function CaseDetailClient({
     if (!newMessage.trim()) return;
 
     setIsSending(true);
-    setSendError('');
+    setSendError("");
 
     try {
       const response = await fetch(
         `/api/conversations/${conversation.id}/messages`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ content: newMessage }),
-        }
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
 
       const sentMessage = await response.json();
 
       // Add message to list
       setMessages([...messages, sentMessage]);
-      setNewMessage('');
+      setNewMessage("");
 
       // Refresh to get updated conversation
       router.refresh();
     } catch (err) {
-      setSendError('Failed to send message. Please try again.');
-      console.error('Send message error:', err);
+      setSendError("Failed to send message. Please try again.");
+      console.error("Send message error:", err);
     } finally {
       setIsSending(false);
     }
@@ -107,7 +110,7 @@ export default function CaseDetailClient({
             </div>
             <span
               className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
-                conversation.status
+                conversation.status,
               )}`}
             >
               {conversation.status}
@@ -131,21 +134,20 @@ export default function CaseDetailClient({
           <div className="space-y-4">
             {messages.length === 0 ? (
               <div className="rounded-lg bg-white p-12 text-center shadow-sm">
-                <p className="text-gray-500">No messages in this conversation yet.</p>
+                <p className="text-gray-500">
+                  No messages in this conversation yet.
+                </p>
               </div>
             ) : (
               messages.map((message) => {
                 const isFromUser =
-                  message.sender?.type === 'contact' ||
-                  message.message_type === 'outgoing';
-                const isActivity = message.message_type === 'activity';
+                  message.sender?.type === "contact" ||
+                  message.message_type === "outgoing";
+                const isActivity = message.message_type === "activity";
 
                 if (isActivity) {
                   return (
-                    <div
-                      key={message.id}
-                      className="flex justify-center py-2"
-                    >
+                    <div key={message.id} className="flex justify-center py-2">
                       <span className="rounded-full bg-gray-100 px-4 py-1 text-xs text-gray-600">
                         {message.content}
                       </span>
@@ -157,14 +159,14 @@ export default function CaseDetailClient({
                   <div
                     key={message.id}
                     className={`flex ${
-                      isFromUser ? 'justify-end' : 'justify-start'
+                      isFromUser ? "justify-end" : "justify-start"
                     }`}
                   >
                     <div
                       className={`max-w-[70%] rounded-lg px-4 py-3 ${
                         isFromUser
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-white text-gray-900 shadow-sm'
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-900 shadow-sm"
                       }`}
                     >
                       {!isFromUser && message.sender && (
@@ -177,40 +179,40 @@ export default function CaseDetailClient({
                       </p>
                       <p
                         className={`mt-2 text-xs ${
-                          isFromUser ? 'text-blue-100' : 'text-gray-500'
+                          isFromUser ? "text-blue-100" : "text-gray-500"
                         }`}
                       >
                         {formatDateTime(message.created_at)}
                       </p>
 
                       {/* Attachments */}
-                      {message.attachments && message.attachments.length > 0 && (
-                        <div className="mt-2 space-y-2">
-                          {message.attachments.map((attachment) => (
-                            <a
-                              key={attachment.id}
-                              href={attachment.data_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`block text-xs underline ${
-                                isFromUser
-                                  ? 'text-blue-100'
-                                  : 'text-blue-600'
-                              }`}
-                            >
-                              {attachment.file_type === 'image' ? (
-                                <img
-                                  src={attachment.data_url}
-                                  alt="Attachment"
-                                  className="mt-2 max-h-48 rounded"
-                                />
-                              ) : (
-                                `View ${attachment.file_type}`
-                              )}
-                            </a>
-                          ))}
-                        </div>
-                      )}
+                      {message.attachments &&
+                        message.attachments.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {message.attachments.map((attachment) => (
+                              <a
+                                key={attachment.id}
+                                href={attachment.data_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`block text-xs underline ${
+                                  isFromUser ? "text-blue-100" : "text-blue-600"
+                                }`}
+                              >
+                                {attachment.file_type === "image" ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={attachment.data_url}
+                                    alt="Attachment"
+                                    className="mt-2 max-h-48 rounded"
+                                  />
+                                ) : (
+                                  `View ${attachment.file_type}`
+                                )}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 );
@@ -235,7 +237,7 @@ export default function CaseDetailClient({
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.ctrlKey) {
+                if (e.key === "Enter" && e.ctrlKey) {
                   e.preventDefault();
                   handleSendMessage();
                 }
@@ -275,7 +277,7 @@ export default function CaseDetailClient({
                   Sending
                 </span>
               ) : (
-                'Send'
+                "Send"
               )}
             </button>
           </form>

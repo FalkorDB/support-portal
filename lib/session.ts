@@ -3,10 +3,10 @@
  * Server-side session handling with secure cookies
  */
 
-import { cookies } from 'next/headers';
-import { User } from '@/types';
+import { cookies } from "next/headers";
+import { User } from "@/types";
 
-const SESSION_COOKIE_NAME = 'chatwoot_session';
+const SESSION_COOKIE_NAME = "support_session";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export interface SessionData {
@@ -21,13 +21,13 @@ export interface SessionData {
  */
 export async function setSession(sessionData: SessionData) {
   const cookieStore = await cookies();
-  
+
   cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(sessionData), {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: MAX_AGE,
-    path: '/',
+    path: "/",
   });
 }
 

@@ -3,9 +3,9 @@
  * POST /api/auth/signup
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { registerUser } from '@/lib/zendesk';
-import { setSession } from '@/lib/session';
+import { NextRequest, NextResponse } from "next/server";
+import { registerUser } from "@/lib/zendesk";
+import { setSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,22 +15,22 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!name || !email || !password || !passwordConfirmation) {
       return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
+        { error: "All fields are required" },
+        { status: 400 },
       );
     }
 
     if (password !== passwordConfirmation) {
       return NextResponse.json(
-        { error: 'Passwords do not match' },
-        { status: 400 }
+        { error: "Passwords do not match" },
+        { status: 400 },
       );
     }
 
     if (password.length < 6) {
       return NextResponse.json(
-        { error: 'Password must be at least 6 characters' },
-        { status: 400 }
+        { error: "Password must be at least 6 characters" },
+        { status: 400 },
       );
     }
 
@@ -42,15 +42,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         requiresConfirmation: true,
-        message: 'Account created! Please check your email to confirm your account.',
+        message:
+          "Account created! Please check your email to confirm your account.",
         user: authResponse.data,
       });
     }
 
     if (!authResponse.access_token) {
       return NextResponse.json(
-        { error: 'Registration succeeded but no access token received. Please try logging in.' },
-        { status: 500 }
+        {
+          error:
+            "Registration succeeded but no access token received. Please try logging in.",
+        },
+        { status: 500 },
       );
     }
 
@@ -68,10 +72,10 @@ export async function POST(request: NextRequest) {
       user: authResponse.data,
     });
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Registration failed' },
-      { status: 400 }
+      { error: error instanceof Error ? error.message : "Registration failed" },
+      { status: 400 },
     );
   }
 }

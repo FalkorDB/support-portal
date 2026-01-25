@@ -3,9 +3,9 @@
  * POST /api/auth/login
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { authenticateUser } from '@/lib/zendesk';
-import { setSession } from '@/lib/session';
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateUser } from "@/lib/zendesk";
+import { setSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,18 +15,18 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
+        { error: "Email and password are required" },
+        { status: 400 },
       );
     }
 
-    // Authenticate with Chatwoot
+    // Authenticate with Zendesk
     const authResponse = await authenticateUser(email, password);
 
     if (!authResponse.access_token) {
       return NextResponse.json(
-        { error: 'Authentication failed - no access token received' },
-        { status: 401 }
+        { error: "Authentication failed - no access token received" },
+        { status: 401 },
       );
     }
 
@@ -43,10 +43,12 @@ export async function POST(request: NextRequest) {
       user: authResponse.data,
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Authentication failed' },
-      { status: 401 }
+      {
+        error: error instanceof Error ? error.message : "Authentication failed",
+      },
+      { status: 401 },
     );
   }
 }
