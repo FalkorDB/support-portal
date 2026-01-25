@@ -43,6 +43,8 @@ export async function getSession(): Promise<SessionData | null> {
   
   if (nextAuthSession?.user) {
     // Convert NextAuth session to our SessionData format
+    // Note: For OAuth users, we use a placeholder token since they don't need
+    // direct Zendesk API access - all API calls go through our backend
     return {
       user: {
         id: nextAuthSession.user.id,
@@ -51,7 +53,7 @@ export async function getSession(): Promise<SessionData | null> {
         role: nextAuthSession.user.role,
         type: nextAuthSession.user.type,
       },
-      accessToken: nextAuthSession.accessToken || process.env.ZENDESK_API_TOKEN || "",
+      accessToken: nextAuthSession.accessToken || "oauth_user_token",
       client: nextAuthSession.user.email || "",
       uid: nextAuthSession.user.email || "",
     };

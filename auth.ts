@@ -40,10 +40,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             user.email,
           );
 
-          // Attach Zendesk user data to the NextAuth user object
-          user.id = zendeskUser.id;
-          user.role = zendeskUser.role;
-          user.type = zendeskUser.type;
+          // Store Zendesk user data by mutating the user object
+          // NextAuth will pass this to the JWT callback
+          Object.assign(user, {
+            id: zendeskUser.id,
+            role: zendeskUser.role,
+            type: zendeskUser.type,
+          });
 
           return true;
         } catch (error) {
@@ -57,7 +60,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in
       if (user) {
-        token.id = Number(user.id);
+        // Safely convert user.id to number with validation
+        const userId = typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
+        if (isNaN(userId)) {
+          console.error("Invalid user ID:", user.id);
+          return token;
+        }
+        
+        token.id = userId;
         token.role = user.role;
         token.type = user.type;
       }
@@ -70,31 +80,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // Add custom fields to session - using type assertion to work around NextAuth type limitations
-      const extendedSession = session as typeof session & {
-        user: typeof session.user & {
-          id: number;
-          role?: string;
-          type: string;
-        };
-        accessToken?: string;
-      };
-
+      // Add custom fields to session
+      // We need to cast to avoid TypeScript errors with module augmentation
       if (token.id !== undefined) {
-        extendedSession.user.id = token.id;
+        (session.user as { id?: number }).id = token.id;
       }
       if (token.role !== undefined) {
-        extendedSession.user.role = token.role;
+        (session.user as { role?: string }).role = token.role;
       }
       if (token.type !== undefined) {
-        extendedSession.user.type = token.type;
+        (session.user as { type?: string }).type = token.type;
       }
 
       if (token.accessToken) {
-        extendedSession.accessToken = token.accessToken as string;
+        (session as { accessToken?: string }).accessToken = token.accessToken as string;
       }
 
-      return extendedSession;
+      return session;
     },
   },
   session: {

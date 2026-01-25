@@ -13,7 +13,7 @@ const protectedRoutes = ["/dashboard", "/cases"];
 // Routes that should redirect to dashboard if already authenticated
 const authRoutes = ["/login", "/signup"];
 
-export default auth((req) => {
+export default auth(function middleware(req) {
   const { pathname } = req.nextUrl;
   
   // Check for NextAuth session
