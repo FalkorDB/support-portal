@@ -105,12 +105,12 @@ export default function DashboardClient({
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                Support Cases
-              </h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Welcome back, {user.name || user.email}
-              </p>
-            </div>
+                  Support Cases
+                </h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  Welcome back, {user.name || user.email}
+                </p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
