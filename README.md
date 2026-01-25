@@ -57,9 +57,9 @@ To enable Google login/signup:
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
-3. Enable the Google+ API
-4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
-5. Configure the OAuth consent screen
+3. In the left sidebar, go to "APIs & Services" → "OAuth consent screen" and configure the consent screen
+4. Then go to "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID" (choose "Web application")
+5. Ensure your application information and scopes are correctly set on the OAuth consent screen
 6. Add authorized redirect URIs:
    - Development: `http://localhost:3000/api/auth/callback/google`
    - Production: `https://yourdomain.com/api/auth/callback/google`

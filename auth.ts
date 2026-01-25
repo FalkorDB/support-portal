@@ -65,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
         if (isNaN(userId)) {
           console.error("Invalid user ID:", user.id);
-          return token;
+          throw new Error("Invalid user ID in JWT callback");
         }
 
         token.id = userId;
@@ -82,15 +82,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       // Add custom fields to session
-      // We need to cast to avoid TypeScript errors with module augmentation
+      // Create a properly typed extended user object to avoid repetitive type assertions
+      const extendedUser = session.user as {
+        id?: number;
+        role?: string;
+        type?: string;
+      };
+
       if (token.id !== undefined) {
-        (session.user as { id?: number }).id = token.id;
+        extendedUser.id = token.id;
       }
       if (token.role !== undefined) {
-        (session.user as { role?: string }).role = token.role;
+        extendedUser.role = token.role;
       }
       if (token.type !== undefined) {
-        (session.user as { type?: string }).type = token.type;
+        extendedUser.type = token.type;
       }
 
       if (token.accessToken) {

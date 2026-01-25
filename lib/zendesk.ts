@@ -24,6 +24,14 @@ function getAuthHeader(): string {
 }
 
 /**
+ * Convert Zendesk role to user type
+ * In this application, 'type' is the same as 'role' for consistency
+ */
+function getUserType(role: string): string {
+  return role;
+}
+
+/**
  * Authenticate a user with email and password
  * Returns user data if successful
  */
@@ -63,7 +71,7 @@ export async function authenticateUser(email: string, _password?: string) {
         email: user.email,
         name: user.name,
         role: user.role,
-        type: user.role === "end-user" ? "end-user" : "agent",
+        type: getUserType(user.role),
       },
       // We'll use the API token for all requests
       access_token: ZENDESK_API_TOKEN,
@@ -153,7 +161,7 @@ export async function findOrCreateZendeskUser(name: string, email: string) {
           email: user.email,
           name: user.name,
           role: user.role,
-          type: user.role === "end-user" ? "end-user" : "agent",
+          type: getUserType(user.role),
         };
       }
     }
@@ -186,7 +194,7 @@ export async function findOrCreateZendeskUser(name: string, email: string) {
       email: createData.user.email,
       name: createData.user.name,
       role: createData.user.role,
-      type: "end-user",
+      type: getUserType(createData.user.role),
     };
   } catch (error) {
     console.error("Zendesk find/create user error:", error);

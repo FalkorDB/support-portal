@@ -14,6 +14,9 @@ export async function POST() {
     // Also clear legacy session cookie if it exists
     await clearSession();
 
+    // Use the standard Web Response API (instead of NextResponse.json)
+    // to keep this route handler framework-agnostic and consistent with
+    // NextAuth which also uses Response.json()
     return Response.json({
       success: true,
       message: "Logged out successfully",
