@@ -35,7 +35,16 @@ export default async function CaseDetailPage({
     };
     
     // Transform comments to messages
-    messages = ticketData.comments.map((comment: any) => ({
+    type ZendeskComment = {
+      id: number;
+      body?: string;
+      html_body?: string;
+      created_at?: string;
+      public?: boolean;
+      author_id?: number;
+    };
+
+    messages = ticketData.comments.map((comment: ZendeskComment) => ({
       id: comment.id,
       content: comment.body || comment.html_body,
       created_at: new Date(comment.created_at).getTime() / 1000,
@@ -46,7 +55,7 @@ export default async function CaseDetailPage({
         type: comment.author_id === session.user.id ? session.user.type : 'user',
       },
     }));
-  } catch (err) {
+  } catch {
     error = 'Failed to load case details';
   }
 

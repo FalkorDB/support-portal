@@ -25,7 +25,7 @@ function getAuthHeader(): string {
  * Authenticate a user with email and password
  * Returns user data if successful
  */
-export async function authenticateUser(email: string, password: string) {
+export async function authenticateUser(email: string) {
   try {
     // Zendesk doesn't support password authentication via API for end users
     // Instead, we'll verify the user exists and use their email as authentication
@@ -50,7 +50,7 @@ export async function authenticateUser(email: string, password: string) {
 
     const user = data.users[0];
     
-    // In a real implementation, verify the password here
+    // In a real implementation, verify the password here (not supported via API)
     // For now, we'll return the user data
     return {
       data: {

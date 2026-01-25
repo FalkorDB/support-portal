@@ -29,7 +29,16 @@ export async function GET(
     const ticketData = await fetchTicket(parseInt(id));
     
     // Transform comments to message format
-    const messages = ticketData.comments.map((comment: any) => ({
+    type ZendeskComment = {
+      id: number;
+      body?: string;
+      html_body?: string;
+      created_at?: string;
+      public?: boolean;
+      author_id?: number;
+    };
+
+    const messages = ticketData.comments.map((comment: ZendeskComment) => ({
       id: comment.id,
       content: comment.body || comment.html_body,
       created_at: new Date(comment.created_at).getTime() / 1000,

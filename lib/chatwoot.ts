@@ -7,7 +7,6 @@ import { AuthResponse, ConversationsResponse, MessagesResponse, Message } from '
 
 const CHATWOOT_BASE_URL = process.env.CHATWOOT_BASE_URL || 'https://app.chatwoot.com';
 const CHATWOOT_ACCOUNT_ID = process.env.CHATWOOT_ACCOUNT_ID;
-const CHATWOOT_INBOX_IDENTIFIER = process.env.CHATWOOT_INBOX_IDENTIFIER;
 
 if (!CHATWOOT_ACCOUNT_ID) {
   console.warn('CHATWOOT_ACCOUNT_ID is not set in environment variables');
@@ -83,16 +82,22 @@ async function authenticateContact(email: string, password: string): Promise<Aut
       },
     }
   );
-  
+
   if (!searchResponse.ok) {
     throw new Error('Authentication failed. Please check your credentials.');
   }
-  
+
   const searchData = await searchResponse.json();
-  console.log('Contact search result:', searchData);
-  
-  const contact = searchData.payload?.find((c: any) => c.email?.toLowerCase() === email.toLowerCase());
-  
+
+  type ChatwootContact = {
+    id?: number;
+    email?: string;
+    name?: string;
+    custom_attributes?: Record<string, unknown> | null;
+  };
+
+  const contact = searchData.payload?.find((c: ChatwootContact) => c.email?.toLowerCase() === email.toLowerCase());
+
   if (!contact) {
     throw new Error('No account found with this email address.');
   }
@@ -254,7 +259,13 @@ export async function sendMessage(
   
   // For contacts, use the authenticated API but with contact's perspective
   // Chatwoot should automatically determine the sender based on the access token
-  const messageBody: any = {
+  type ChatwootMessageBody = {
+    content: string;
+    private?: boolean;
+    message_type?: string | number;
+  };
+
+  const messageBody: ChatwootMessageBody = {
     content,
     private: false,
   };

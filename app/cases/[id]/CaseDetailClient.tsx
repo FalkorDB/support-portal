@@ -16,7 +16,7 @@ interface CaseDetailClientProps {
 export default function CaseDetailClient({
   conversation,
   initialMessages,
-  user,
+  user: _user,
   error,
 }: CaseDetailClientProps) {
   const router = useRouter();
@@ -25,6 +25,9 @@ export default function CaseDetailClient({
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use `_user` in a no-op to avoid unused variable lint warnings
+  void _user;
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -199,6 +202,7 @@ export default function CaseDetailClient({
                               }`}
                             >
                               {attachment.file_type === 'image' ? (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={attachment.data_url}
                                   alt="Attachment"

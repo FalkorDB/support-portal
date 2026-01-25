@@ -7,7 +7,6 @@ import { AuthResponse } from '@/types';
 
 const CHATWOOT_BASE_URL = process.env.CHATWOOT_BASE_URL || 'https://app.chatwoot.com';
 const CHATWOOT_ACCOUNT_ID = process.env.CHATWOOT_ACCOUNT_ID;
-const CHATWOOT_INBOX_IDENTIFIER = process.env.CHATWOOT_INBOX_IDENTIFIER;
 
 /**
  * Create a new contact (customer) in Chatwoot

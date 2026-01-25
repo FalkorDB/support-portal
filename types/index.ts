@@ -37,7 +37,7 @@ export interface Contact {
   phone_number?: string;
   avatar?: string;
   custom_attributes?: {
-    [key: string]: any;
+    [key: string]: Record<string, unknown> | string | number | boolean | null;
   };
 }
 
@@ -51,7 +51,7 @@ export interface Message {
   source_id?: string;
   content_type?: 'text' | 'input_text' | 'input_textarea' | 'input_email' | 'input_select' | 'cards' | 'form';
   content_attributes?: {
-    [key: string]: any;
+    [key: string]: Record<string, unknown> | string | number | boolean | null;
   };
   sender?: {
     id: number;

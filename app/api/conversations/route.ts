@@ -3,11 +3,11 @@
  * GET /api/conversations
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { fetchConversations } from '@/lib/chatwoot';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get session
     const session = await getSession();
