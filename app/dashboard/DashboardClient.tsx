@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Conversation, User } from "@/types";
 import { formatDate, getStatusColor } from "@/lib/utils";
+import NewCaseModal from "./NewCaseModal";
 
 interface DashboardClientProps {
   initialConversations: Conversation[];
@@ -22,6 +23,7 @@ export default function DashboardClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -33,6 +35,11 @@ export default function DashboardClient({
       console.error("Logout failed:", err);
       setIsLoggingOut(false);
     }
+  };
+
+  const handleCaseCreated = () => {
+    // Refresh the page to show the new case
+    router.refresh();
   };
 
   // Filter and search conversations
@@ -105,12 +112,12 @@ export default function DashboardClient({
               />
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                Support Cases
-              </h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Welcome back, {user.name || user.email}
-              </p>
-            </div>
+                  Support Cases
+                </h1>
+                <p className="mt-1 text-sm text-gray-500">
+                  Welcome back, {user.name || user.email}
+                </p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
@@ -181,6 +188,26 @@ export default function DashboardClient({
             <option value="resolved">Resolved</option>
             <option value="snoozed">Snoozed</option>
           </select>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+            title="Create new case"
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span className="hidden sm:inline">New Case</span>
+          </button>
         </div>
 
         {/* Cases List */}
@@ -259,6 +286,13 @@ export default function DashboardClient({
           </div>
         )}
       </main>
+
+      {/* New Case Modal */}
+      <NewCaseModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleCaseCreated}
+      />
     </div>
   );
 }
