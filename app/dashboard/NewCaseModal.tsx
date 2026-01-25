@@ -33,7 +33,7 @@ export default function NewCaseModal({
         body: JSON.stringify({
           subject,
           description,
-          priority: priority || "normal",
+          priority,
         }),
       });
 
