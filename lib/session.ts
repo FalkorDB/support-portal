@@ -23,7 +23,7 @@ export async function getSession(): Promise<SessionData | null> {
     return null;
   }
 
-  // Convert NextAuth session to our SessionData format
+  // Return the session data in our SessionData format
   return {
     user: {
       id: nextAuthSession.user.id,
