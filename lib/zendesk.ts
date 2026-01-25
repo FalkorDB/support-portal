@@ -128,6 +128,73 @@ export async function registerUser(
 }
 
 /**
+ * Find or create a user in Zendesk (for OAuth flows)
+ * Used when users sign in with Google or other OAuth providers
+ */
+export async function findOrCreateZendeskUser(name: string, email: string) {
+  try {
+    // First, try to find existing user
+    const searchResponse = await fetch(
+      `${ZENDESK_BASE_URL}/users/search.json?query=email:${encodeURIComponent(email)}`,
+      {
+        headers: {
+          Authorization: getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      if (searchData.users && searchData.users.length > 0) {
+        const user = searchData.users[0];
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          type: user.role === "end-user" ? "end-user" : "agent",
+        };
+      }
+    }
+
+    // User doesn't exist, create a new one
+    const createResponse = await fetch(`${ZENDESK_BASE_URL}/users.json`, {
+      method: "POST",
+      headers: {
+        Authorization: getAuthHeader(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user: {
+          name,
+          email,
+          role: "end-user",
+          verified: true, // Auto-verify OAuth users
+        },
+      }),
+    });
+
+    if (!createResponse.ok) {
+      const errorData = await createResponse.json();
+      throw new Error(errorData.error || "Failed to create user");
+    }
+
+    const createData = await createResponse.json();
+    return {
+      id: createData.user.id,
+      email: createData.user.email,
+      name: createData.user.name,
+      role: createData.user.role,
+      type: "end-user",
+    };
+  } catch (error) {
+    console.error("Zendesk find/create user error:", error);
+    throw error;
+  }
+}
+
+/**
  * Fetch tickets for a specific user
  */
 export async function fetchUserTickets(userId: number, userRole: string) {

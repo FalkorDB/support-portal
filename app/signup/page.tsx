@@ -3,6 +3,7 @@
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 function SignupForm() {
   const router = useRouter();
@@ -78,7 +79,26 @@ function SignupForm() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {/* Google Sign-In Option */}
+        <div className="mt-8">
+          <GoogleSignInButton
+            callbackUrl={searchParams.get("from") || "/dashboard"}
+            text="Sign up with Google"
+          />
+        </div>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-gray-50 px-2 text-gray-500">
+              Or continue with email
+            </span>
+          </div>
+        </div>
+
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label htmlFor="name" className="sr-only">
