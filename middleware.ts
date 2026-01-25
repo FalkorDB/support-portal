@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if user has session cookie
-  const sessionCookie = request.cookies.get("chatwoot_session");
+  const sessionCookie = request.cookies.get("support_session");
   const isAuthenticated = !!sessionCookie?.value;
 
   // Check if the current route is protected

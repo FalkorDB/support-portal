@@ -1,7 +1,7 @@
 {
-  "name": "chatwoot-support-portal",
+  "name": "support-portal",
   "version": "1.0.0",
-  "description": "Customer-facing support portal for Chatwoot",
+  "description": "Customer-facing support portal for Zendesk",
   "private": true,
   "scripts": {
     "dev": "next dev",

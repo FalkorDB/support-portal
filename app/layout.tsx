@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Chatwoot Support Portal",
+  title: "Support Portal",
   description: "View and manage your support cases",
 };
 

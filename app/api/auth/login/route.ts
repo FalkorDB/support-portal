@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Authenticate with Chatwoot
+    // Authenticate with Zendesk
     const authResponse = await authenticateUser(email, password);
 
     if (!authResponse.access_token) {
