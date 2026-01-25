@@ -25,7 +25,7 @@ function getAuthHeader(): string {
  * Authenticate a user with email and password
  * Returns user data if successful
  */
-export async function authenticateUser(email: string) {
+  export async function authenticateUser(email: string, _password?: string) {
   try {
     // Zendesk doesn't support password authentication via API for end users
     // Instead, we'll verify the user exists and use their email as authentication
@@ -114,6 +114,7 @@ export async function registerUser(
         type: 'end-user',
       },
       access_token: ZENDESK_API_TOKEN,
+      requiresConfirmation: false,
     };
   } catch (error) {
     console.error('Zendesk registration error:', error);

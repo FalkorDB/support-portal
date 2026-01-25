@@ -15,8 +15,8 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format date to human-readable string
  */
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+export function formatDate(dateInput: string | number | Date): string {
+  const date = typeof dateInput === 'string' || typeof dateInput === 'number' ? new Date(dateInput) : dateInput;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -49,8 +49,8 @@ export function formatDate(dateString: string): string {
 /**
  * Format date to full datetime string
  */
-export function formatDateTime(dateString: string): string {
-  const date = new Date(dateString);
+export function formatDateTime(dateInput: string | number | Date): string {
+  const date = typeof dateInput === 'string' || typeof dateInput === 'number' ? new Date(dateInput) : dateInput;
   return date.toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',

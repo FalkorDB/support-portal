@@ -5,6 +5,7 @@ export interface User {
   name: string;
   role?: string;
   type: string; // 'end-user' or 'agent'
+  account_id?: number;
 }
 
 export interface AuthResponse {

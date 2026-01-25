@@ -44,17 +44,23 @@ export default async function CaseDetailPage({
       author_id?: number;
     };
 
-    messages = ticketData.comments.map((comment: ZendeskComment) => ({
-      id: comment.id,
-      content: comment.body || comment.html_body,
-      created_at: new Date(comment.created_at).getTime() / 1000,
-      message_type: comment.public ? (comment.author_id === session.user.id ? 'outgoing' : 'incoming') : 'activity',
-      sender: {
-        id: comment.author_id,
-        name: 'User',
-        type: comment.author_id === session.user.id ? session.user.type : 'user',
-      },
-    }));
+    messages = ticketData.comments.map((comment: ZendeskComment) => {
+      const createdAt = comment.created_at
+        ? Math.floor(new Date(comment.created_at).getTime() / 1000)
+        : Math.floor(Date.now() / 1000);
+
+      return {
+        id: comment.id,
+        content: comment.body || comment.html_body,
+        created_at: createdAt,
+        message_type: comment.public ? (comment.author_id === session.user.id ? 'outgoing' : 'incoming') : 'activity',
+        sender: {
+          id: comment.author_id,
+          name: 'User',
+          type: comment.author_id === session.user.id ? session.user.type : 'user',
+        },
+      };
+    });
   } catch {
     error = 'Failed to load case details';
   }
