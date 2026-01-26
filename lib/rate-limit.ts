@@ -10,18 +10,26 @@ type RateLimitStore = {
 
 const rateLimitMap = new Map<string, RateLimitStore>();
 
-// Clean up expired entries every 5 minutes
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [key, value] of rateLimitMap.entries()) {
-      if (value.resetTime < now) {
-        rateLimitMap.delete(key);
-      }
+// Track last cleanup time for lazy cleanup
+let lastCleanupTime = Date.now();
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Lazy cleanup of expired entries
+ * Only runs if CLEANUP_INTERVAL has passed since last cleanup
+ */
+function cleanupExpiredEntries(now: number): void {
+  if (now - lastCleanupTime < CLEANUP_INTERVAL) {
+    return; // Skip if we cleaned up recently
+  }
+
+  lastCleanupTime = now;
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (value.resetTime < now) {
+      rateLimitMap.delete(key);
     }
-  },
-  5 * 60 * 1000,
-);
+  }
+}
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -41,6 +49,10 @@ export function checkRateLimit(
   scope: string = "default",
 ): { allowed: boolean; remainingTime?: number } {
   const now = Date.now();
+  
+  // Perform lazy cleanup of expired entries
+  cleanupExpiredEntries(now);
+  
   const key = `ratelimit:${scope}:${identifier}`;
   const limit = rateLimitMap.get(key);
 
