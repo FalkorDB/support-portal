@@ -14,11 +14,7 @@ interface CaseDetailClientProps {
 }
 
 // Valid status transitions for end-users vs agents
-const getValidStatuses = (
-  userType: string,
-  currentStatus: string,
-  canBeSolvedByMe?: boolean,
-) => {
+const getValidStatuses = (userType: string, currentStatus: string) => {
   if (userType === "end-user") {
     // End-users can only change status after an agent has responded
     // New tickets cannot be modified by end-users
@@ -58,11 +54,7 @@ export default function CaseDetailClient({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const validStatuses = getValidStatuses(
-    user.type,
-    currentStatus,
-    conversation.can_be_solved_by_me,
-  );
+  const validStatuses = getValidStatuses(user.type, currentStatus);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -96,15 +88,18 @@ export default function CaseDetailClient({
       }
 
       const data = await response.json();
-      
+
       // Check if Zendesk actually changed the status
       // Note: Zendesk may return "solved" when we request "closed" for end-users
-      if (data.status !== newStatus && !(newStatus === "closed" && data.status === "solved")) {
+      if (
+        data.status !== newStatus &&
+        !(newStatus === "closed" && data.status === "solved")
+      ) {
         throw new Error(
-          `Unable to set status to "${newStatus}". This ticket must be assigned to an agent before it can be marked as solved.`
+          `Unable to set status to "${newStatus}". This ticket must be assigned to an agent before it can be marked as solved.`,
         );
       }
-      
+
       setCurrentStatus(data.status);
 
       // Refresh to get updated conversation
@@ -113,7 +108,10 @@ export default function CaseDetailClient({
       console.error("Status update error:", err);
       // Revert to previous status on error
       setCurrentStatus(previousStatus);
-      const errorMessage = err instanceof Error ? err.message : "Failed to update status. Please try again.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to update status. Please try again.";
       setStatusError(errorMessage);
     } finally {
       setIsUpdatingStatus(false);
@@ -215,15 +213,18 @@ export default function CaseDetailClient({
                 )} ${user.type === "end-user" ? "cursor-default" : "cursor-pointer"} appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 <option value={currentStatus}>
-                  {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+                  {currentStatus.charAt(0).toUpperCase() +
+                    currentStatus.slice(1)}
                 </option>
-                {user.type !== "end-user" && validStatuses.map((status) => (
-                  status.value !== currentStatus && (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  )
-                ))}
+                {user.type !== "end-user" &&
+                  validStatuses.map(
+                    (status) =>
+                      status.value !== currentStatus && (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ),
+                  )}
               </select>
               <svg
                 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600"
@@ -303,7 +304,8 @@ export default function CaseDetailClient({
                       {!isFromUser && message.sender && (
                         <p className="mb-1 text-xs font-semibold text-gray-600">
                           {message.sender.name}
-                          {message.sender.type === "agent" || message.sender.type === "admin" ? (
+                          {message.sender.type === "agent" ||
+                          message.sender.type === "admin" ? (
                             <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
                               Agent
                             </span>

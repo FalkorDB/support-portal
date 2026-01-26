@@ -51,11 +51,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ account }) {
       // With Zendesk OAuth, users are already authenticated with their Zendesk account
       // The profile data from OAuth already contains all user information
       // No need to create users - they already exist in Zendesk
-      
+
       if (account?.provider === "zendesk") {
         return true;
       }

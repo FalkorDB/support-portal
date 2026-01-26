@@ -53,7 +53,7 @@ export default async function CaseDetailPage({
       public?: boolean;
       author_id?: number;
     };
-    
+
     type ZendeskUser = {
       id: number;
       name: string;
@@ -77,7 +77,7 @@ export default async function CaseDetailPage({
 
       const author = userMap.get(comment.author_id || 0);
       // Note: session.user.id might be a different ID format, so we compare names as fallback
-      const isCurrentUser = 
+      const isCurrentUser =
         comment.author_id === session.user.id ||
         (author?.name === session.user.name && author?.agent === false);
       const isAgent = author?.agent === true;
@@ -94,7 +94,11 @@ export default async function CaseDetailPage({
         sender: {
           id: comment.author_id,
           name: author?.name || (isCurrentUser ? session.user.name : "User"),
-          type: isCurrentUser ? session.user.type : (isAgent ? "agent" : "contact"),
+          type: isCurrentUser
+            ? session.user.type
+            : isAgent
+              ? "agent"
+              : "contact",
         },
       };
     });

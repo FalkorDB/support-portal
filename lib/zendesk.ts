@@ -22,22 +22,11 @@ function getOAuthHeader(accessToken: string): string {
 }
 
 /**
- * Convert Zendesk role to user type
- * Currently, 'type' is the same as 'role' for simplicity and consistency.
- * This helper function exists to centralize the logic in case future
- * requirements need different type mapping (e.g., grouping multiple roles
- * into broader types).
- */
-function getUserType(role: string): string {
-  return role;
-}
-
-/**
  * Fetch tickets for a specific user
  * @param userId - The user's Zendesk ID
  * @param userRole - The user's role (end-user or agent)
  * @param accessToken - OAuth access token from the user's session
- * 
+ *
  * Note: When using OAuth, /tickets.json automatically filters based on the
  * authenticated user's permissions. End-users see their requested tickets,
  * agents see tickets they have access to.
@@ -52,7 +41,7 @@ export async function fetchUserTickets(
     // - End-users: /requests.json (shows their submitted requests)
     // - Agents/Admins: /tickets.json (shows tickets they have access to)
     let url: string;
-    
+
     if (userRole === "end-user") {
       // End-users use the /requests.json endpoint with OAuth
       url = `${ZENDESK_BASE_URL}/requests.json`;
@@ -67,7 +56,7 @@ export async function fetchUserTickets(
         "Content-Type": "application/json",
       },
     });
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Zendesk API error:", response.status, errorText);
@@ -75,21 +64,31 @@ export async function fetchUserTickets(
     }
 
     const data = await response.json();
-    
+
     // The /requests.json endpoint returns "requests" not "tickets"
     // Transform requests to match ticket format for consistency
     if (userRole === "end-user" && data.requests) {
-      return data.requests.map((request: any) => ({
-        id: request.id,
-        status: request.status,
-        subject: request.subject,
-        description: request.description,
-        created_at: request.created_at,
-        updated_at: request.updated_at,
-        requester_id: request.requester_id,
-      }));
+      return data.requests.map(
+        (request: {
+          id: number;
+          status: string;
+          subject: string;
+          description: string;
+          created_at: string;
+          updated_at: string;
+          requester_id: number;
+        }) => ({
+          id: request.id,
+          status: request.status,
+          subject: request.subject,
+          description: request.description,
+          created_at: request.created_at,
+          updated_at: request.updated_at,
+          requester_id: request.requester_id,
+        }),
+      );
     }
-    
+
     return data.tickets || [];
   } catch (error) {
     console.error("Zendesk fetch tickets error:", error);
@@ -158,7 +157,7 @@ export async function fetchTicket(
     const ticket =
       userRole === "end-user" ? ticketData.request : ticketData.ticket;
     const comments = commentsData.comments || [];
-    
+
     // Extract users data if available (agents get this, end-users might not)
     const users = commentsData.users || ticketData.users || [];
 
