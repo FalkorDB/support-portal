@@ -348,11 +348,12 @@ export async function updateTicketStatus(
 
     // Different payload structure for end-users vs agents
     // End-users use 'solved' boolean field, not 'status' field
+    // Note: Setting solved to true works for both "solved" and "closed" status
     const body =
       userRole === "end-user"
         ? JSON.stringify({
             request: {
-              solved: status === "solved",
+              solved: status === "solved" || status === "closed",
               // Zendesk auto-sets status based on solved field:
               // solved: true  -> status becomes "solved"
               // solved: false -> status becomes "open"

@@ -41,6 +41,7 @@ export default async function CaseDetailPage({
       status: ticketData.ticket.status,
       created_at: ticketData.ticket.created_at,
       updated_at: ticketData.ticket.updated_at,
+      can_be_solved_by_me: ticketData.ticket.can_be_solved_by_me,
     };
 
     // Transform comments to messages

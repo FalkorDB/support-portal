@@ -14,17 +14,23 @@ interface CaseDetailClientProps {
 }
 
 // Valid status transitions for end-users vs agents
-const getValidStatuses = (userType: string, currentStatus: string) => {
+const getValidStatuses = (
+  userType: string,
+  currentStatus: string,
+  canBeSolvedByMe?: boolean,
+) => {
   if (userType === "end-user") {
     // End-users can only change status after an agent has responded
     // New tickets cannot be modified by end-users
     if (currentStatus === "new" || currentStatus === "closed") {
       return []; // No valid transitions
     }
-    // Open/pending/solved tickets can be reopened or marked solved
+    // Allow open, solved, and closed options
+    // Note: Zendesk may reject if can_be_solved_by_me is false (ticket not assigned)
     return [
       { value: "open", label: "Open" },
       { value: "solved", label: "Solved" },
+      { value: "closed", label: "Closed" },
     ];
   }
   // Agents can set all statuses
@@ -52,7 +58,11 @@ export default function CaseDetailClient({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const validStatuses = getValidStatuses(user.type, currentStatus);
+  const validStatuses = getValidStatuses(
+    user.type,
+    currentStatus,
+    conversation.can_be_solved_by_me,
+  );
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -88,9 +98,10 @@ export default function CaseDetailClient({
       const data = await response.json();
       
       // Check if Zendesk actually changed the status
-      if (data.status !== newStatus) {
+      // Note: Zendesk may return "solved" when we request "closed" for end-users
+      if (data.status !== newStatus && !(newStatus === "closed" && data.status === "solved")) {
         throw new Error(
-          `Unable to set status to "${newStatus}". ${user.type === "end-user" ? "End-users can only set status to Open or Solved." : "Status change not permitted."}`
+          `Unable to set status to "${newStatus}". This ticket must be assigned to an agent before it can be marked as solved.`
         );
       }
       
@@ -189,33 +200,29 @@ export default function CaseDetailClient({
                 onChange={(e) => handleStatusChange(e.target.value)}
                 disabled={
                   isUpdatingStatus ||
-                  validStatuses.length === 0 ||
+                  user.type === "end-user" ||
                   currentStatus === "closed"
                 }
                 title={
-                  currentStatus === "closed"
-                    ? "Closed tickets cannot be reopened"
-                    : currentStatus === "new" && user.type === "end-user"
-                      ? "Status can be changed after an agent responds"
-                      : user.type === "end-user"
-                        ? "You can reopen or mark as solved"
-                        : "Change ticket status"
+                  user.type === "end-user"
+                    ? "Status is managed by support agents"
+                    : currentStatus === "closed"
+                      ? "Closed tickets cannot be reopened"
+                      : "Change ticket status"
                 }
                 className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
                   currentStatus,
-                )} cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}
+                )} ${user.type === "end-user" ? "cursor-default" : "cursor-pointer"} appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                {/* Show current status if not in valid list or no valid statuses */}
-                {(validStatuses.length === 0 ||
-                  !validStatuses.some((s) => s.value === currentStatus)) && (
-                  <option value={currentStatus}>
-                    {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
-                  </option>
-                )}
-                {validStatuses.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
+                <option value={currentStatus}>
+                  {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+                </option>
+                {user.type !== "end-user" && validStatuses.map((status) => (
+                  status.value !== currentStatus && (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  )
                 ))}
               </select>
               <svg

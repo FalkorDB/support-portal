@@ -37,11 +37,11 @@ export const updateTicketStatusSchema = z.object({
   status: z.enum(["new", "open", "pending", "solved", "closed"]),
 });
 
-// End-user can only set open or solved
+// End-user can only set open, solved, or closed
 export const updateTicketStatusEndUserSchema = z.object({
-  status: z.enum(["open", "solved"], {
+  status: z.enum(["open", "solved", "closed"], {
     errorMap: () => ({
-      message: "End-users can only set status to 'open' or 'solved'",
+      message: "End-users can only set status to 'open', 'solved', or 'closed'",
     }),
   }),
 });
