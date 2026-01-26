@@ -27,7 +27,11 @@ export default async function DashboardPage() {
   let error = null;
 
   try {
-    const tickets = await fetchUserTickets(session.user.id, session.user.type);
+    const tickets = await fetchUserTickets(
+      session.user.id,
+      session.user.type,
+      session.accessToken,
+    );
 
     // Transform Zendesk tickets to our Conversation format
     conversations = tickets.map((ticket: ZendeskTicket) => ({

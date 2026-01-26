@@ -38,9 +38,11 @@ jobs:
       env:
         # Use dummy values for build-time environment variables
         ZENDESK_SUBDOMAIN: ci-test
-        ZENDESK_EMAIL: ci@test.com
-        ZENDESK_API_TOKEN: dummy-token-for-ci
+        ZENDESK_OAUTH_CLIENT_ID: dummy-oauth-client-id
+        ZENDESK_OAUTH_CLIENT_SECRET: dummy-oauth-client-secret
         SESSION_SECRET: ci-test-secret-key
+        AUTH_SECRET: ci-test-auth-secret
+        AUTH_URL: http://localhost:3000
 
     - name: Check build output
       run: |

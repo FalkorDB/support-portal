@@ -4,130 +4,91 @@
  */
 
 const ZENDESK_SUBDOMAIN = process.env.ZENDESK_SUBDOMAIN;
-const ZENDESK_EMAIL = process.env.ZENDESK_EMAIL;
-const ZENDESK_API_TOKEN = process.env.ZENDESK_API_TOKEN;
 
-if (!ZENDESK_SUBDOMAIN || !ZENDESK_EMAIL || !ZENDESK_API_TOKEN) {
+if (!ZENDESK_SUBDOMAIN) {
   console.warn(
-    "Zendesk configuration is incomplete. Please check your environment variables.",
+    "Zendesk SUBDOMAIN is required. Please check your environment variables.",
   );
 }
 
 const ZENDESK_BASE_URL = `https://${ZENDESK_SUBDOMAIN}.zendesk.com/api/v2`;
 
 /**
- * Create basic auth header for Zendesk API
+ * Create OAuth bearer token header for user operations
+ * All API calls use the user's OAuth access token from their session
  */
-function getAuthHeader(): string {
-  const credentials = `${ZENDESK_EMAIL}/token:${ZENDESK_API_TOKEN}`;
-  return `Basic ${Buffer.from(credentials).toString("base64")}`;
-}
-
-/**
- * Convert Zendesk role to user type
- * Currently, 'type' is the same as 'role' for simplicity and consistency.
- * This helper function exists to centralize the logic in case future
- * requirements need different type mapping (e.g., grouping multiple roles
- * into broader types).
- */
-function getUserType(role: string): string {
-  return role;
-}
-
-/**
- * Find or create a user in Zendesk (for OAuth flows)
- * Used when users sign in with Google or other OAuth providers
- */
-export async function findOrCreateZendeskUser(name: string, email: string) {
-  try {
-    // First, try to find existing user
-    const searchResponse = await fetch(
-      `${ZENDESK_BASE_URL}/users/search.json?query=email:${encodeURIComponent(email)}`,
-      {
-        headers: {
-          Authorization: getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (searchResponse.ok) {
-      const searchData = await searchResponse.json();
-      if (searchData.users && searchData.users.length > 0) {
-        const user = searchData.users[0];
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          type: getUserType(user.role),
-        };
-      }
-    }
-
-    // User doesn't exist, create a new one
-    const createResponse = await fetch(`${ZENDESK_BASE_URL}/users.json`, {
-      method: "POST",
-      headers: {
-        Authorization: getAuthHeader(),
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user: {
-          name,
-          email,
-          role: "end-user",
-          verified: true, // Auto-verify OAuth users
-        },
-      }),
-    });
-
-    if (!createResponse.ok) {
-      const errorData = await createResponse.json();
-      throw new Error(errorData.error || "Failed to create user");
-    }
-
-    const createData = await createResponse.json();
-    return {
-      id: createData.user.id,
-      email: createData.user.email,
-      name: createData.user.name,
-      role: createData.user.role,
-      type: getUserType(createData.user.role),
-    };
-  } catch (error) {
-    console.error("Zendesk find/create user error:", error);
-    throw error;
-  }
+function getOAuthHeader(accessToken: string): string {
+  return `Bearer ${accessToken}`;
 }
 
 /**
  * Fetch tickets for a specific user
+ * @param userId - The user's Zendesk ID
+ * @param userRole - The user's role (end-user or agent)
+ * @param accessToken - OAuth access token from the user's session
+ *
+ * Note: When using OAuth, /tickets.json automatically filters based on the
+ * authenticated user's permissions. End-users see their requested tickets,
+ * agents see tickets they have access to.
  */
-export async function fetchUserTickets(userId: number, userRole: string) {
+export async function fetchUserTickets(
+  userId: number,
+  userRole: string,
+  accessToken: string,
+) {
   try {
-    let url = `${ZENDESK_BASE_URL}/tickets.json`;
+    // Different endpoints for different roles when using OAuth:
+    // - End-users: /requests.json (shows their submitted requests)
+    // - Agents/Admins: /tickets.json (OAuth scopes to tickets they have access to)
+    let url: string;
 
-    // For end users, only fetch their tickets
     if (userRole === "end-user") {
-      url = `${ZENDESK_BASE_URL}/users/${userId}/tickets/requested.json`;
+      // End-users use the /requests.json endpoint with OAuth
+      url = `${ZENDESK_BASE_URL}/requests.json`;
     } else {
-      // For agents, fetch assigned tickets
-      url = `${ZENDESK_BASE_URL}/users/${userId}/tickets/assigned.json`;
+      // Agents use /tickets.json - OAuth token automatically scopes results
+      url = `${ZENDESK_BASE_URL}/tickets.json`;
     }
 
     const response = await fetch(url, {
       headers: {
-        Authorization: getAuthHeader(),
+        Authorization: getOAuthHeader(accessToken),
         "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Zendesk API error:", response.status, errorText);
       throw new Error(`Failed to fetch tickets: ${response.status}`);
     }
 
     const data = await response.json();
+
+    // The /requests.json endpoint returns "requests" not "tickets"
+    // Transform requests to match ticket format for consistency
+    if (userRole === "end-user" && data.requests) {
+      return data.requests.map(
+        (request: {
+          id: number;
+          status: string;
+          subject: string;
+          description: string;
+          created_at: string;
+          updated_at: string;
+          requester_id: number;
+        }) => ({
+          id: request.id,
+          status: request.status,
+          subject: request.subject,
+          description: request.description,
+          created_at: request.created_at,
+          updated_at: request.updated_at,
+          requester_id: request.requester_id,
+        }),
+      );
+    }
+
     return data.tickets || [];
   } catch (error) {
     console.error("Zendesk fetch tickets error:", error);
@@ -137,34 +98,73 @@ export async function fetchUserTickets(userId: number, userRole: string) {
 
 /**
  * Fetch a specific ticket with comments
+ * @param ticketId - The ticket ID
+ * @param accessToken - OAuth access token from the user's session
+ * @param userRole - The user's role (end-user or agent) - needed to determine correct endpoint
  */
-export async function fetchTicket(ticketId: number) {
+export async function fetchTicket(
+  ticketId: number,
+  accessToken: string,
+  userRole: string,
+) {
   try {
+    // Different endpoints for different roles:
+    // - End-users: /requests/{id}.json (for their submitted requests)
+    // - Agents/Admins: /tickets/{id}.json (for any ticket they can access)
+    const ticketUrl =
+      userRole === "end-user"
+        ? `${ZENDESK_BASE_URL}/requests/${ticketId}.json`
+        : `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`;
+
+    const commentsUrl =
+      userRole === "end-user"
+        ? `${ZENDESK_BASE_URL}/requests/${ticketId}/comments.json?include=users`
+        : `${ZENDESK_BASE_URL}/tickets/${ticketId}/comments.json?include=users`;
+
     const [ticketResponse, commentsResponse] = await Promise.all([
-      fetch(`${ZENDESK_BASE_URL}/tickets/${ticketId}.json`, {
+      fetch(ticketUrl, {
         headers: {
-          Authorization: getAuthHeader(),
+          Authorization: getOAuthHeader(accessToken),
           "Content-Type": "application/json",
         },
       }),
-      fetch(`${ZENDESK_BASE_URL}/tickets/${ticketId}/comments.json`, {
+      fetch(commentsUrl, {
         headers: {
-          Authorization: getAuthHeader(),
+          Authorization: getOAuthHeader(accessToken),
           "Content-Type": "application/json",
         },
       }),
     ]);
 
     if (!ticketResponse.ok || !commentsResponse.ok) {
+      const ticketError = !ticketResponse.ok ? await ticketResponse.text() : "";
+      const commentsError = !commentsResponse.ok
+        ? await commentsResponse.text()
+        : "";
+      console.error(
+        "Zendesk API error:",
+        ticketResponse.status,
+        commentsResponse.status,
+        { ticketError, commentsError },
+      );
       throw new Error("Failed to fetch ticket details");
     }
 
     const ticketData = await ticketResponse.json();
     const commentsData = await commentsResponse.json();
 
+    // Handle different response formats
+    const ticket =
+      userRole === "end-user" ? ticketData.request : ticketData.ticket;
+    const comments = commentsData.comments || [];
+
+    // Extract users data if available (agents get this, end-users might not)
+    const users = commentsData.users || ticketData.users || [];
+
     return {
-      ticket: ticketData.ticket,
-      comments: commentsData.comments || [],
+      ticket,
+      comments,
+      users,
     };
   } catch (error) {
     console.error("Zendesk fetch ticket error:", error);
@@ -174,41 +174,71 @@ export async function fetchTicket(ticketId: number) {
 
 /**
  * Add a comment to a ticket
+ * @param ticketId - The ticket ID
+ * @param body - The comment text
+ * @param userId - The user's ID (for response data)
+ * @param accessToken - OAuth access token from the user's session
+ * @param isPublic - Whether the comment is public
  */
 export async function addComment(
   ticketId: number,
   body: string,
   userId: number,
+  accessToken: string,
+  userRole: string,
   isPublic: boolean = true,
 ) {
   try {
-    const response = await fetch(
-      `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ticket: {
-            comment: {
-              body,
-              public: isPublic,
-              author_id: userId,
+    // End-users use /requests/{id}.json, agents use /tickets/{id}.json
+    const url =
+      userRole === "end-user"
+        ? `${ZENDESK_BASE_URL}/requests/${ticketId}.json`
+        : `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`;
+
+    // Different payload structure
+    const payload =
+      userRole === "end-user"
+        ? {
+            request: {
+              comment: {
+                body,
+              },
             },
-          },
-        }),
+          }
+        : {
+            ticket: {
+              comment: {
+                body,
+                public: isPublic,
+                author_id: userId,
+              },
+            },
+          };
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: getOAuthHeader(accessToken),
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(payload),
+    });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to add comment");
+      const errorText = await response.text();
+      console.error("Zendesk add comment error:", response.status, errorText);
+      let errorMessage = "Failed to add comment";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = JSON.stringify(errorData);
+      } catch {
+        errorMessage = errorText || "Failed to add comment";
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    return data.ticket;
+    return userRole === "end-user" ? data.request : data.ticket;
   } catch (error) {
     console.error("Zendesk add comment error:", error);
     throw error;
@@ -217,39 +247,75 @@ export async function addComment(
 
 /**
  * Create a new ticket
+ * @param subject - The ticket subject
+ * @param description - The ticket description
+ * @param userId - The requester's user ID
+ * @param accessToken - OAuth access token from the user's session
+ * @param userRole - The user's role (end-user or agent)
+ * @param priority - The ticket priority
  */
 export async function createTicket(
   subject: string,
   description: string,
   userId: number,
+  accessToken: string,
+  userRole: string,
   priority: string = "normal",
 ) {
   try {
-    const response = await fetch(`${ZENDESK_BASE_URL}/tickets.json`, {
+    // End-users use /requests.json, agents use /tickets.json
+    const url =
+      userRole === "end-user"
+        ? `${ZENDESK_BASE_URL}/requests.json`
+        : `${ZENDESK_BASE_URL}/tickets.json`;
+
+    // Different payload structure for requests vs tickets
+    const body =
+      userRole === "end-user"
+        ? JSON.stringify({
+            request: {
+              subject,
+              comment: {
+                body: description,
+              },
+              priority,
+            },
+          })
+        : JSON.stringify({
+            ticket: {
+              subject,
+              comment: {
+                body: description,
+              },
+              requester_id: userId,
+              priority,
+            },
+          });
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: getAuthHeader(),
+        Authorization: getOAuthHeader(accessToken),
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        ticket: {
-          subject,
-          comment: {
-            body: description,
-          },
-          requester_id: userId,
-          priority,
-        },
-      }),
+      body,
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to create ticket");
+      const errorText = await response.text();
+      console.error("Zendesk create ticket error:", response.status, errorText);
+      let errorMessage = "Failed to create ticket";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = JSON.stringify(errorData);
+      } catch {
+        errorMessage = errorText || "Failed to create ticket";
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    return data.ticket;
+    return userRole === "end-user" ? data.request : data.ticket;
   } catch (error) {
     console.error("Zendesk create ticket error:", error);
     throw error;
@@ -261,34 +327,71 @@ export async function createTicket(
  *
  * @param {number} ticketId - The ID of the Zendesk ticket to update.
  * @param {string} status - The new status to apply to the ticket.
+ * @param {string} accessToken - OAuth access token from the user's session.
+ * @param {string} userRole - The user's role (end-user or agent).
  * @returns {Promise<any>} A promise that resolves with the updated ticket object.
  * @throws {Error} If the request to Zendesk fails or returns a non-OK response.
  */
-export async function updateTicketStatus(ticketId: number, status: string) {
+export async function updateTicketStatus(
+  ticketId: number,
+  status: string,
+  accessToken: string,
+  userRole: string,
+) {
   try {
-    const response = await fetch(
-      `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: getAuthHeader(),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ticket: {
-            status,
-          },
-        }),
+    // End-users use /requests/{id}.json, agents use /tickets/{id}.json
+    const url =
+      userRole === "end-user"
+        ? `${ZENDESK_BASE_URL}/requests/${ticketId}.json`
+        : `${ZENDESK_BASE_URL}/tickets/${ticketId}.json`;
+
+    // Different payload structure for end-users vs agents
+    // End-users use 'solved' boolean field, not 'status' field
+    // Note: Setting solved to true works for both "solved" and "closed" status
+    const body =
+      userRole === "end-user"
+        ? JSON.stringify({
+            request: {
+              solved: status === "solved" || status === "closed",
+              // Zendesk auto-sets status based on solved field:
+              // solved: true  -> status becomes "solved"
+              // solved: false -> status becomes "open"
+            },
+          })
+        : JSON.stringify({
+            ticket: {
+              status,
+            },
+          });
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: getOAuthHeader(accessToken),
+        "Content-Type": "application/json",
       },
-    );
+      body,
+    });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to update ticket status");
+      const errorText = await response.text();
+      console.error(
+        "Zendesk update ticket status error:",
+        response.status,
+        errorText,
+      );
+      let errorMessage = "Failed to update ticket status";
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = JSON.stringify(errorData);
+      } catch {
+        errorMessage = errorText || "Failed to update ticket status";
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    return data.ticket;
+    return userRole === "end-user" ? data.request : data.ticket;
   } catch (error) {
     console.error("Zendesk update ticket status error:", error);
     throw error;

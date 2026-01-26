@@ -37,6 +37,13 @@ export const updateTicketStatusSchema = z.object({
   status: z.enum(["new", "open", "pending", "solved", "closed"]),
 });
 
+// End-user can only set open, solved, or closed
+export const updateTicketStatusEndUserSchema = z.object({
+  status: z.enum(["open", "solved", "closed"], {
+    message: "End-users can only set status to 'open', 'solved', or 'closed'",
+  }),
+});
+
 // Ticket ID parameter validation
 export const ticketIdSchema = z.string().regex(/^\d+$/, "Invalid ticket ID");
 

@@ -20,6 +20,7 @@ export interface Conversation {
   status: "new" | "open" | "pending" | "solved" | "closed";
   created_at: string;
   updated_at: string;
+  can_be_solved_by_me?: boolean;
   messages?: Message[];
   meta?: {
     sender?: Contact;

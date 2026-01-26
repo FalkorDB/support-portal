@@ -57,8 +57,12 @@ export async function GET(
       );
     }
 
-    // Fetch ticket comments from Zendesk
-    const ticketData = await fetchTicket(parseInt(id));
+    // Fetch ticket comments from Zendesk using OAuth token
+    const ticketData = await fetchTicket(
+      parseInt(id),
+      session.accessToken,
+      session.user.type,
+    );
 
     // Transform comments to message format
     type ZendeskComment = {
@@ -152,11 +156,13 @@ export async function POST(
 
     const { content } = validation.data;
 
-    // Add comment to Zendesk ticket
+    // Add comment to Zendesk ticket using OAuth token
     const ticket = await addComment(
       parseInt(id),
       content,
       session.user.id,
+      session.accessToken,
+      session.user.type,
       true,
     );
 
