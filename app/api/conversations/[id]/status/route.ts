@@ -88,12 +88,6 @@ export async function PATCH(
 
     const { status } = validation.data;
 
-    console.log("API: Updating ticket status:", {
-      ticketId: id,
-      requestedStatus: status,
-      userType: session.user.type,
-    });
-
     // Update ticket status in Zendesk using OAuth token
     const ticket = await updateTicketStatus(
       parseInt(id),
@@ -101,11 +95,6 @@ export async function PATCH(
       session.accessToken,
       session.user.type,
     );
-
-    console.log("API: Zendesk returned:", {
-      ticketId: ticket.id,
-      returnedStatus: ticket.status,
-    });
 
     // Return the updated ticket data
     return NextResponse.json({

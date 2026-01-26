@@ -52,26 +52,48 @@ export default async function CaseDetailPage({
       public?: boolean;
       author_id?: number;
     };
+    
+    type ZendeskUser = {
+      id: number;
+      name: string;
+      email?: string;
+      role?: string;
+      agent?: boolean;
+    };
+
+    // Create a user lookup map
+    const userMap = new Map<number, ZendeskUser>();
+    if (ticketData.users) {
+      ticketData.users.forEach((user: ZendeskUser) => {
+        userMap.set(user.id, user);
+      });
+    }
 
     messages = ticketData.comments.map((comment: ZendeskComment) => {
       const createdAt = comment.created_at
         ? Math.floor(new Date(comment.created_at).getTime() / 1000)
         : 0; // deterministic fallback (avoid calling Date.now in render)
 
+      const author = userMap.get(comment.author_id || 0);
+      // Note: session.user.id might be a different ID format, so we compare names as fallback
+      const isCurrentUser = 
+        comment.author_id === session.user.id ||
+        (author?.name === session.user.name && author?.agent === false);
+      const isAgent = author?.agent === true;
+
       return {
         id: comment.id,
         content: comment.body || comment.html_body,
         created_at: createdAt,
         message_type: comment.public
-          ? comment.author_id === session.user.id
+          ? isCurrentUser
             ? "outgoing"
             : "incoming"
           : "activity",
         sender: {
           id: comment.author_id,
-          name: "User",
-          type:
-            comment.author_id === session.user.id ? session.user.type : "user",
+          name: author?.name || (isCurrentUser ? session.user.name : "User"),
+          type: isCurrentUser ? session.user.type : (isAgent ? "agent" : "contact"),
         },
       };
     });

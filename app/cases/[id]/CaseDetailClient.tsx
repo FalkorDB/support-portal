@@ -86,16 +86,9 @@ export default function CaseDetailClient({
       }
 
       const data = await response.json();
-      console.log("Status update response:", {
-        previousStatus,
-        requestedStatus: newStatus,
-        returnedStatus: data.status,
-        data,
-      });
       
       // Check if Zendesk actually changed the status
       if (data.status !== newStatus) {
-        console.error("Status mismatch:", { requested: newStatus, received: data.status });
         throw new Error(
           `Unable to set status to "${newStatus}". ${user.type === "end-user" ? "End-users can only set status to Open or Solved." : "Status change not permitted."}`
         );
@@ -303,6 +296,11 @@ export default function CaseDetailClient({
                       {!isFromUser && message.sender && (
                         <p className="mb-1 text-xs font-semibold text-gray-600">
                           {message.sender.name}
+                          {message.sender.type === "agent" || message.sender.type === "admin" ? (
+                            <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+                              Agent
+                            </span>
+                          ) : null}
                         </p>
                       )}
                       <p className="whitespace-pre-wrap break-words text-sm">

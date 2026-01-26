@@ -119,8 +119,8 @@ export async function fetchTicket(
 
     const commentsUrl =
       userRole === "end-user"
-        ? `${ZENDESK_BASE_URL}/requests/${ticketId}/comments.json`
-        : `${ZENDESK_BASE_URL}/tickets/${ticketId}/comments.json`;
+        ? `${ZENDESK_BASE_URL}/requests/${ticketId}/comments.json?include=users`
+        : `${ZENDESK_BASE_URL}/tickets/${ticketId}/comments.json?include=users`;
 
     const [ticketResponse, commentsResponse] = await Promise.all([
       fetch(ticketUrl, {
@@ -158,10 +158,14 @@ export async function fetchTicket(
     const ticket =
       userRole === "end-user" ? ticketData.request : ticketData.ticket;
     const comments = commentsData.comments || [];
+    
+    // Extract users data if available (agents get this, end-users might not)
+    const users = commentsData.users || ticketData.users || [];
 
     return {
       ticket,
       comments,
+      users,
     };
   } catch (error) {
     console.error("Zendesk fetch ticket error:", error);
@@ -360,8 +364,6 @@ export async function updateTicketStatus(
             },
           });
 
-    console.log("Zendesk updateTicketStatus:", { ticketId, status, userRole, url, body });
-
     const response = await fetch(url, {
       method: "PUT",
       headers: {
@@ -370,8 +372,6 @@ export async function updateTicketStatus(
       },
       body,
     });
-
-    console.log("Zendesk response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -391,9 +391,7 @@ export async function updateTicketStatus(
     }
 
     const data = await response.json();
-    const ticket = userRole === "end-user" ? data.request : data.ticket;
-    console.log("Zendesk returned full response:", { request: data.request, ticket: data.ticket });
-    return ticket;
+    return userRole === "end-user" ? data.request : data.ticket;
   } catch (error) {
     console.error("Zendesk update ticket status error:", error);
     throw error;
