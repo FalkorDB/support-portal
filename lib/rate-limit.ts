@@ -49,10 +49,10 @@ export function checkRateLimit(
   scope: string = "default",
 ): { allowed: boolean; remainingTime?: number } {
   const now = Date.now();
-  
+
   // Perform lazy cleanup of expired entries
   cleanupExpiredEntries(now);
-  
+
   const key = `ratelimit:${scope}:${identifier}`;
   const limit = rateLimitMap.get(key);
 
