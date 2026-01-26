@@ -38,23 +38,17 @@ export default function DashboardClient({
   };
 
   const handleCaseCreated = () => {
-    // Refresh the page to show the new case
-    router.refresh();
+    // Reload the page to show the new case
+    window.location.reload();
   };
 
   // Filter and search conversations
   const filteredConversations = useMemo(() => {
     return conversations.filter((conversation) => {
-      // Status filter (map 'resolved' to Zendesk's 'solved' and 'closed')
+      // Status filter
       if (statusFilter !== "all") {
-        if (statusFilter === "resolved") {
-          if (
-            conversation.status !== "solved" &&
-            conversation.status !== "closed"
-          ) {
-            return false;
-          }
-        } else if (statusFilter === "open") {
+        if (statusFilter === "open") {
+          // Group 'new' and 'open' together as "Open"
           if (conversation.status !== "open" && conversation.status !== "new") {
             return false;
           }
@@ -77,12 +71,13 @@ export default function DashboardClient({
     });
   }, [conversations, searchQuery, statusFilter]);
 
-  // Count by status (Zendesk uses 'solved' and 'closed' for resolved tickets)
+  // Count by status
   const statusCounts = useMemo(() => {
     const counts = {
       open: 0,
       pending: 0,
-      resolved: 0,
+      solved: 0,
+      closed: 0,
     };
 
     conversations.forEach((conv) => {
@@ -90,8 +85,10 @@ export default function DashboardClient({
         counts.open++;
       } else if (conv.status === "pending") {
         counts.pending++;
-      } else if (conv.status === "solved" || conv.status === "closed") {
-        counts.resolved++;
+      } else if (conv.status === "solved") {
+        counts.solved++;
+      } else if (conv.status === "closed") {
+        counts.closed++;
       }
     });
 
@@ -141,7 +138,7 @@ export default function DashboardClient({
         )}
 
         {/* Status Stats */}
-        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-5">
           <div className="rounded-lg bg-white p-4 shadow-sm">
             <p className="text-sm font-medium text-gray-600">Total Cases</p>
             <p className="mt-2 text-3xl font-bold text-gray-900">
@@ -161,9 +158,15 @@ export default function DashboardClient({
             </p>
           </div>
           <div className="rounded-lg bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-gray-600">Resolved</p>
+            <p className="text-sm font-medium text-gray-600">Solved</p>
             <p className="mt-2 text-3xl font-bold text-green-600">
-              {statusCounts.resolved || 0}
+              {statusCounts.solved || 0}
+            </p>
+          </div>
+          <div className="rounded-lg bg-white p-4 shadow-sm">
+            <p className="text-sm font-medium text-gray-600">Closed</p>
+            <p className="mt-2 text-3xl font-bold text-gray-600">
+              {statusCounts.closed || 0}
             </p>
           </div>
         </div>
@@ -187,8 +190,8 @@ export default function DashboardClient({
             <option value="all">All Status</option>
             <option value="open">Open</option>
             <option value="pending">Pending</option>
-            <option value="resolved">Resolved</option>
-            <option value="snoozed">Snoozed</option>
+            <option value="solved">Solved</option>
+            <option value="closed">Closed</option>
           </select>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -224,8 +227,11 @@ export default function DashboardClient({
         ) : (
           <div className="space-y-4">
             {filteredConversations.map((conversation) => {
-              const lastMessage = conversation.messages?.[0];
-              const messagePreview = lastMessage?.content || "No messages yet";
+              // Get message preview from last_non_activity_message (subject) or messages
+              const messagePreview =
+                conversation.last_non_activity_message?.content ||
+                conversation.messages?.[0]?.content ||
+                "No messages yet";
 
               return (
                 <Link
