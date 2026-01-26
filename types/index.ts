@@ -17,14 +17,7 @@ export interface AuthResponse {
 // Conversation/Ticket Types
 export interface Conversation {
   id: number;
-  status:
-    | "new"
-    | "open"
-    | "pending"
-    | "solved"
-    | "closed"
-    | "resolved"
-    | "snoozed";
+  status: "new" | "open" | "pending" | "solved" | "closed";
   created_at: string;
   updated_at: string;
   messages?: Message[];

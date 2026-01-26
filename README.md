@@ -43,10 +43,11 @@ ZENDESK_API_TOKEN=your_api_token_here
 # Session Secret (generate a random string)
 SESSION_SECRET=your_random_secret_key_here
 
-# NextAuth Configuration (for OAuth)
+# NextAuth Configuration
 AUTH_SECRET=your_random_secret_key_here
+AUTH_URL=http://localhost:3000  # Change to your production URL in production
 
-# Google OAuth (optional - for Google login/signup)
+# Google OAuth (for Google login/signup)
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
@@ -108,28 +109,28 @@ npm run dev
 
 All Zendesk API calls are proxied through Next.js API routes for security:
 
-- `POST /api/auth/login` - Authenticate user via Zendesk user search (legacy)
-- `POST /api/auth/signup` - Register new user (creates Zendesk end-user) (legacy)
-- `POST /api/auth/logout` - Log out user
 - `GET/POST /api/auth/[...nextauth]` - NextAuth authentication handlers (Google OAuth)
 - `GET /api/conversations/[id]/messages` - Get ticket comments
 - `POST /api/conversations/[id]/messages` - Add comment to ticket
+- `PATCH /api/conversations/[id]/status` - Update ticket status
+- `POST /api/tickets` - Create new ticket
 
 ## Security
 
 - Zendesk API credentials never exposed to the frontend
 - All API calls proxied through secure Next.js API routes
-- Authentication tokens stored in httpOnly cookies
+- JWT-based session management with NextAuth
 - Protected routes using Next.js middleware with NextAuth
 - Input validation on all forms
 - Google OAuth for secure authentication
-- Basic authentication with Zendesk API (email/token)
+- Rate limiting on API endpoints
+- User creation automatically integrated with Zendesk
 
 **⚠️ Production Security Notes:**
 
-- Current legacy authentication uses basic email lookup (development only)
-- Google OAuth is recommended for production use
-- For production, consider implementing Zendesk SSO/JWT authentication
+- Google OAuth is the primary authentication method
+- Users are automatically created as Zendesk end-users on first login
+- For enterprise deployments, consider implementing Zendesk SSO/JWT authentication
 - See [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for security recommendations
 
 ## Development
@@ -163,8 +164,9 @@ This application can be deployed to any platform that supports Next.js:
    - `ZENDESK_API_TOKEN`
    - `SESSION_SECRET`
    - `AUTH_SECRET`
-   - `GOOGLE_CLIENT_ID` (optional)
-   - `GOOGLE_CLIENT_SECRET` (optional)
+   - `AUTH_URL` - Your production URL (e.g., `https://yourdomain.com`)
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
 
 2. For GitHub Actions deployment, add these as repository secrets
 
