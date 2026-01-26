@@ -109,28 +109,28 @@ npm run dev
 
 All Zendesk API calls are proxied through Next.js API routes for security:
 
-- `POST /api/auth/login` - Authenticate user via Zendesk user search (legacy)
-- `POST /api/auth/signup` - Register new user (creates Zendesk end-user) (legacy)
-- `POST /api/auth/logout` - Log out user
 - `GET/POST /api/auth/[...nextauth]` - NextAuth authentication handlers (Google OAuth)
 - `GET /api/conversations/[id]/messages` - Get ticket comments
 - `POST /api/conversations/[id]/messages` - Add comment to ticket
+- `PATCH /api/conversations/[id]/status` - Update ticket status
+- `POST /api/tickets` - Create new ticket
 
 ## Security
 
 - Zendesk API credentials never exposed to the frontend
 - All API calls proxied through secure Next.js API routes
-- Authentication tokens stored in httpOnly cookies
+- JWT-based session management with NextAuth
 - Protected routes using Next.js middleware with NextAuth
 - Input validation on all forms
 - Google OAuth for secure authentication
-- Basic authentication with Zendesk API (email/token)
+- Rate limiting on API endpoints
+- User creation automatically integrated with Zendesk
 
 **⚠️ Production Security Notes:**
 
-- Current legacy authentication uses basic email lookup (development only)
-- Google OAuth is recommended for production use
-- For production, consider implementing Zendesk SSO/JWT authentication
+- Google OAuth is the primary authentication method
+- Users are automatically created as Zendesk end-users on first login
+- For enterprise deployments, consider implementing Zendesk SSO/JWT authentication
 - See [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for security recommendations
 
 ## Development

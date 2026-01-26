@@ -34,15 +34,7 @@ export const createMessageSchema = z.object({
 
 // Ticket status update validation
 export const updateTicketStatusSchema = z.object({
-  status: z.enum([
-    "new",
-    "open",
-    "pending",
-    "solved",
-    "closed",
-    "resolved",
-    "snoozed",
-  ]),
+  status: z.enum(["new", "open", "pending", "solved", "closed"]),
 });
 
 // Ticket ID parameter validation

@@ -76,8 +76,6 @@ export function getStatusColor(status: string): string {
     pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
     solved: "bg-green-100 text-green-800 border-green-200",
     closed: "bg-gray-100 text-gray-800 border-gray-200",
-    resolved: "bg-green-100 text-green-800 border-green-200",
-    snoozed: "bg-gray-100 text-gray-800 border-gray-200",
   };
 
   return colors[status] || "bg-gray-100 text-gray-800 border-gray-200";
