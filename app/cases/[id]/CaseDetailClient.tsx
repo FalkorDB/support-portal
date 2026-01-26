@@ -13,10 +13,34 @@ interface CaseDetailClientProps {
   error: string | null;
 }
 
+// Valid status transitions for end-users vs agents
+const getValidStatuses = (userType: string, currentStatus: string) => {
+  if (userType === "end-user") {
+    // End-users can only change status after an agent has responded
+    // New tickets cannot be modified by end-users
+    if (currentStatus === "new" || currentStatus === "closed") {
+      return []; // No valid transitions
+    }
+    // Open/pending/solved tickets can be reopened or marked solved
+    return [
+      { value: "open", label: "Open" },
+      { value: "solved", label: "Solved" },
+    ];
+  }
+  // Agents can set all statuses
+  return [
+    { value: "new", label: "New" },
+    { value: "open", label: "Open" },
+    { value: "pending", label: "Pending" },
+    { value: "solved", label: "Solved" },
+    { value: "closed", label: "Closed" },
+  ];
+};
+
 export default function CaseDetailClient({
   conversation,
   initialMessages,
-  user: _user,
+  user,
   error,
 }: CaseDetailClientProps) {
   const router = useRouter();
@@ -28,9 +52,7 @@ export default function CaseDetailClient({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Use `_user` in a no-op to avoid unused variable lint warnings
-  void _user;
+  const validStatuses = getValidStatuses(user.type, currentStatus);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -58,10 +80,27 @@ export default function CaseDetailClient({
       );
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Status update failed:", response.status, errorText);
         throw new Error("Failed to update status");
       }
 
       const data = await response.json();
+      console.log("Status update response:", {
+        previousStatus,
+        requestedStatus: newStatus,
+        returnedStatus: data.status,
+        data,
+      });
+      
+      // Check if Zendesk actually changed the status
+      if (data.status !== newStatus) {
+        console.error("Status mismatch:", { requested: newStatus, received: data.status });
+        throw new Error(
+          `Unable to set status to "${newStatus}". ${user.type === "end-user" ? "End-users can only set status to Open or Solved." : "Status change not permitted."}`
+        );
+      }
+      
       setCurrentStatus(data.status);
 
       // Refresh to get updated conversation
@@ -70,7 +109,8 @@ export default function CaseDetailClient({
       console.error("Status update error:", err);
       // Revert to previous status on error
       setCurrentStatus(previousStatus);
-      setStatusError("Failed to update status. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Failed to update status. Please try again.";
+      setStatusError(errorMessage);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -154,21 +194,36 @@ export default function CaseDetailClient({
               <select
                 value={currentStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                disabled={isUpdatingStatus || currentStatus === "closed"}
+                disabled={
+                  isUpdatingStatus ||
+                  validStatuses.length === 0 ||
+                  currentStatus === "closed"
+                }
                 title={
                   currentStatus === "closed"
                     ? "Closed tickets cannot be reopened"
-                    : ""
+                    : currentStatus === "new" && user.type === "end-user"
+                      ? "Status can be changed after an agent responds"
+                      : user.type === "end-user"
+                        ? "You can reopen or mark as solved"
+                        : "Change ticket status"
                 }
                 className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
                   currentStatus,
                 )} cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                <option value="new">new</option>
-                <option value="open">open</option>
-                <option value="pending">pending</option>
-                <option value="solved">solved</option>
-                <option value="closed">closed</option>
+                {/* Show current status if not in valid list or no valid statuses */}
+                {(validStatuses.length === 0 ||
+                  !validStatuses.some((s) => s.value === currentStatus)) && (
+                  <option value={currentStatus}>
+                    {currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}
+                  </option>
+                )}
+                {validStatuses.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
               </select>
               <svg
                 className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600"

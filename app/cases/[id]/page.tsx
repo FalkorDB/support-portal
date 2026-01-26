@@ -18,13 +18,22 @@ export default async function CaseDetailPage({
     redirect("/login");
   }
 
+  if (!session.accessToken) {
+    // If no access token, redirect to login to re-authenticate
+    redirect("/login");
+  }
+
   // Fetch ticket and comments server-side
   let conversation = null;
   let messages: Message[] = [];
   let error = null;
 
   try {
-    const ticketData = await fetchTicket(parseInt(id));
+    const ticketData = await fetchTicket(
+      parseInt(id),
+      session.accessToken,
+      session.user.type,
+    );
 
     // Transform Zendesk ticket to conversation format
     conversation = {

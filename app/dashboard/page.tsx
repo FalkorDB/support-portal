@@ -22,12 +22,21 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  if (!session.accessToken) {
+    // If no access token, redirect to login to re-authenticate
+    redirect("/login");
+  }
+
   // Fetch tickets server-side
   let conversations: Conversation[] = [];
   let error = null;
 
   try {
-    const tickets = await fetchUserTickets(session.user.id, session.user.type);
+    const tickets = await fetchUserTickets(
+      session.user.id,
+      session.user.type,
+      session.accessToken,
+    );
 
     // Transform Zendesk tickets to our Conversation format
     conversations = tickets.map((ticket: ZendeskTicket) => ({
