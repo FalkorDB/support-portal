@@ -8,40 +8,36 @@ This support portal is now configured to work with Zendesk. Follow these steps t
 - Node.js 18+ installed
 - Access to Zendesk Admin Center
 
-## Step 1: Get Your Zendesk Credentials
-
-### 1.1 Find Your Subdomain
+## Step 1: Get Your Zendesk Subdomain
 
 Your subdomain is the first part of your Zendesk URL. For example, if your Zendesk URL is `https://mycompany.zendesk.com`, your subdomain is `mycompany`.
 
-### 1.2 Get Your API Token
+## Step 2: Create Zendesk OAuth Client
 
 1. Log into your Zendesk account
 2. Go to **Admin Center** (gear icon → Admin Center)
-3. Navigate to **Apps and integrations** → **APIs** → **Zendesk API**
-4. Click on **Settings** tab
-5. Under **Token Access**, enable token access if it's not already enabled
-6. Click **Add API token**
-7. Give it a description (e.g., "Support Portal")
-8. Click **Create**
-9. **Copy the API token** (you won't be able to see it again!)
+3. Navigate to **Apps and integrations** → **APIs** → **OAuth Clients**
+4. Click **Add OAuth Client**
+5. Fill in the details:
+   - **Client Name**: Support Portal (or any name)
+   - **Redirect URLs**: Add `http://localhost:3000/api/auth/callback/zendesk`
+   - **Scopes**: Select **read** and **write**
+6. Click **Save**
+7. Copy the **Client ID** and **Secret** (you'll need these for your `.env.local`)
 
-### 1.3 Your Admin Email
-
-This is the email address of your Zendesk admin account.
-
-## Step 2: Configure Environment Variables
+## Step 3: Configure Environment Variables
 
 1. Open `.env.local` in the project root
 2. Update the following values:
 
 ```env
 ZENDESK_SUBDOMAIN=your-subdomain
-ZENDESK_EMAIL=your-admin-email@example.com
-ZENDESK_API_TOKEN=your_api_token_here
+ZENDESK_OAUTH_CLIENT_ID=your_client_id_from_step_2
+ZENDESK_OAUTH_CLIENT_SECRET=your_client_secret_from_step_2
+AUTH_SECRET=generate_a_random_secret
 ```
 
-## Step 3: Install Dependencies and Run
+## Step 4: Install Dependencies and Run
 
 ```bash
 npm install
@@ -75,10 +71,11 @@ The support portal will be available at http://localhost:3000
 
 ### Recommended Production Setup:
 
-1. Implement Zendesk SSO (Single Sign-On) with JWT
-2. Use Zendesk's Web Widget SDK for better integration
-3. Add proper password hashing and secure storage
-4. Implement rate limiting and security headers
+1. **OAuth-based authentication**: All user operations use OAuth tokens (already implemented)
+2. **Audit trail**: All actions are performed with user's own credentials
+3. Use HTTPS in production
+4. Set strong `AUTH_SECRET` and `SESSION_SECRET` values
+5. Add production redirect URI to Zendesk OAuth client
 
 ### API Limitations:
 

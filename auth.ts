@@ -51,34 +51,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/login",
   },
   callbacks: {
-    async signIn({ user, account }) {
-      // When a user signs in, we need to:
-      // 1. Check if they exist in Zendesk
-      // 2. If not, create them as an end-user
-      // 3. Store their Zendesk user ID in the session
+    async signIn({ account }) {
+      // With Zendesk OAuth, users are already authenticated with their Zendesk account
+      // The profile data from OAuth already contains all user information
+      // No need to create users - they already exist in Zendesk
 
-      if (account?.provider === "zendesk" && user.email) {
-        try {
-          // Import dynamically to avoid circular dependencies
-          const { findOrCreateZendeskUser } = await import("@/lib/zendesk");
-          const zendeskUser = await findOrCreateZendeskUser(
-            user.name || user.email,
-            user.email,
-          );
-
-          // Store Zendesk user data by mutating the user object
-          // NextAuth will pass this to the JWT callback
-          Object.assign(user, {
-            id: zendeskUser.id,
-            role: zendeskUser.role,
-            type: zendeskUser.type,
-          });
-
-          return true;
-        } catch (error) {
-          console.error("Error creating/finding Zendesk user:", error);
-          return false;
-        }
+      if (account?.provider === "zendesk") {
+        return true;
       }
 
       return true;

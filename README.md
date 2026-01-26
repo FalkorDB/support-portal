@@ -27,7 +27,6 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 
 - Node.js 20+
 - A Zendesk account (any plan with API access)
-- Zendesk API token (see [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for instructions)
 - Zendesk OAuth client credentials (see [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for setup)
 
 ## Environment Variables
@@ -37,8 +36,6 @@ Create a `.env.local` file in the root directory with the following variables:
 ```env
 # Zendesk Configuration
 ZENDESK_SUBDOMAIN=your_subdomain
-ZENDESK_EMAIL=your_admin_email@example.com
-ZENDESK_API_TOKEN=your_api_token_here
 
 # Zendesk OAuth Configuration
 ZENDESK_OAUTH_CLIENT_ID=your_zendesk_oauth_client_id
@@ -103,6 +100,8 @@ All Zendesk API calls are proxied through Next.js API routes for security:
 
 ## Security
 
+- **OAuth-based operations**: All user operations (view tickets, add comments, create tickets) use the user's OAuth access token
+- **Principle of least privilege**: Users can only access what their Zendesk permissions allow
 - Zendesk API credentials never exposed to the frontend
 - All API calls proxied through secure Next.js API routes
 - JWT-based session management with NextAuth
@@ -110,13 +109,14 @@ All Zendesk API calls are proxied through Next.js API routes for security:
 - Input validation on all forms
 - Zendesk OAuth for secure authentication
 - Rate limiting on API endpoints
-- User creation automatically integrated with Zendesk
+- Proper audit trail showing which user made changes
 
 **⚠️ Production Security Notes:**
 
 - Zendesk OAuth is the authentication method
 - Users authenticate using their Zendesk accounts
-- Users are automatically created as Zendesk end-users on first OAuth login
+- OAuth access tokens are stored securely in encrypted JWT sessions
+- Each user's operations are performed with their own permissions
 - See [ZENDESK_SETUP.md](ZENDESK_SETUP.md) for security recommendations
 
 ## Development
@@ -146,8 +146,6 @@ This application can be deployed to any platform that supports Next.js:
 
 1. Set up environment variables in your deployment platform:
    - `ZENDESK_SUBDOMAIN`
-   - `ZENDESK_EMAIL`
-   - `ZENDESK_API_TOKEN`
    - `ZENDESK_OAUTH_CLIENT_ID`
    - `ZENDESK_OAUTH_CLIENT_SECRET`
    - `SESSION_SECRET`

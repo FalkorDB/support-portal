@@ -18,6 +18,7 @@ import { getSession } from "@/lib/session";
 import { updateTicketStatus } from "@/lib/zendesk";
 import {
   updateTicketStatusSchema,
+  updateTicketStatusEndUserSchema,
   ticketIdSchema,
   validateAndSanitize,
 } from "@/lib/validation";
@@ -66,9 +67,13 @@ export async function PATCH(
       );
     }
 
-    // Parse and validate request body
+    // Parse and validate request body with role-specific validation
     const body = await request.json();
-    const validation = validateAndSanitize(updateTicketStatusSchema, body);
+    const validationSchema =
+      session.user.type === "end-user"
+        ? updateTicketStatusEndUserSchema
+        : updateTicketStatusSchema;
+    const validation = validateAndSanitize(validationSchema, body);
 
     if (!validation.success) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
@@ -76,8 +81,13 @@ export async function PATCH(
 
     const { status } = validation.data;
 
-    // Update ticket status in Zendesk
-    const ticket = await updateTicketStatus(parseInt(id), status);
+    // Update ticket status in Zendesk using OAuth token
+    const ticket = await updateTicketStatus(
+      parseInt(id),
+      status,
+      session.accessToken,
+      session.user.type,
+    );
 
     // Return the updated ticket data
     return NextResponse.json({

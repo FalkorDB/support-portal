@@ -50,11 +50,13 @@ export async function POST(request: NextRequest) {
 
     const { subject, description, priority } = validation.data;
 
-    // Create ticket in Zendesk
+    // Create ticket in Zendesk using OAuth token
     const ticket = await createTicket(
       subject,
       description,
       session.user.id,
+      session.accessToken,
+      session.user.type,
       priority,
     );
 
