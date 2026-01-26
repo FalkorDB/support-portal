@@ -38,9 +38,10 @@ export function checkRateLimit(
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 60, // 60 requests per minute
   },
+  scope: string = "default",
 ): { allowed: boolean; remainingTime?: number } {
   const now = Date.now();
-  const key = `ratelimit:${identifier}`;
+  const key = `ratelimit:${scope}:${identifier}`;
   const limit = rateLimitMap.get(key);
 
   if (!limit || limit.resetTime < now) {

@@ -49,7 +49,7 @@ export async function PATCH(
 
     // Check rate limit
     const rateLimitId = getRateLimitIdentifier(request, session.user.id);
-    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.general);
+    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.general, "general");
 
     if (!rateLimit.allowed) {
       const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);

@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // Check rate limit
     const rateLimitId = getRateLimitIdentifier(request, session.user.id);
-    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.createTicket);
+    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.createTicket, "createTicket");
 
     if (!rateLimit.allowed) {
       const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);

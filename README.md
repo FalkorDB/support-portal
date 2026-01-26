@@ -43,10 +43,11 @@ ZENDESK_API_TOKEN=your_api_token_here
 # Session Secret (generate a random string)
 SESSION_SECRET=your_random_secret_key_here
 
-# NextAuth Configuration (for OAuth)
+# NextAuth Configuration
 AUTH_SECRET=your_random_secret_key_here
+AUTH_URL=http://localhost:3000  # Change to your production URL in production
 
-# Google OAuth (optional - for Google login/signup)
+# Google OAuth (for Google login/signup)
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
@@ -163,8 +164,9 @@ This application can be deployed to any platform that supports Next.js:
    - `ZENDESK_API_TOKEN`
    - `SESSION_SECRET`
    - `AUTH_SECRET`
-   - `GOOGLE_CLIENT_ID` (optional)
-   - `GOOGLE_CLIENT_SECRET` (optional)
+   - `AUTH_URL` - Your production URL (e.g., `https://yourdomain.com`)
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
 
 2. For GitHub Actions deployment, add these as repository secrets
 
