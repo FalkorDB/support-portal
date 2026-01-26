@@ -22,11 +22,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  if (!session.accessToken) {
-    // If no access token, redirect to login to re-authenticate
-    redirect("/login");
-  }
-
   // Fetch tickets server-side
   let conversations: Conversation[] = [];
   let error = null;

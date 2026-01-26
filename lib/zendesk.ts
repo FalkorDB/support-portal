@@ -39,14 +39,14 @@ export async function fetchUserTickets(
   try {
     // Different endpoints for different roles when using OAuth:
     // - End-users: /requests.json (shows their submitted requests)
-    // - Agents/Admins: /tickets.json (shows tickets they have access to)
+    // - Agents/Admins: /tickets.json (OAuth scopes to tickets they have access to)
     let url: string;
 
     if (userRole === "end-user") {
       // End-users use the /requests.json endpoint with OAuth
       url = `${ZENDESK_BASE_URL}/requests.json`;
     } else {
-      // Agents and admins use /tickets.json
+      // Agents use /tickets.json - OAuth token automatically scopes results
       url = `${ZENDESK_BASE_URL}/tickets.json`;
     }
 

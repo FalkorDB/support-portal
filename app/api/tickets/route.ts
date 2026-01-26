@@ -16,13 +16,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (!session.accessToken) {
-      return NextResponse.json(
-        { error: "No access token available" },
-        { status: 401 },
-      );
-    }
-
     // Check rate limit
     const rateLimitId = getRateLimitIdentifier(request, session.user.id);
     const rateLimit = checkRateLimit(

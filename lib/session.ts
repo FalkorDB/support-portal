@@ -23,6 +23,11 @@ export async function getSession(): Promise<SessionData | null> {
     return null;
   }
 
+  // Don't return session if accessToken is missing - user needs to re-authenticate
+  if (!nextAuthSession.accessToken) {
+    return null;
+  }
+
   // Return the session data in our SessionData format
   return {
     user: {
@@ -32,7 +37,7 @@ export async function getSession(): Promise<SessionData | null> {
       role: nextAuthSession.user.role,
       type: nextAuthSession.user.type,
     },
-    accessToken: nextAuthSession.accessToken || "oauth_user_token",
+    accessToken: nextAuthSession.accessToken,
     client: nextAuthSession.user.email || "",
     uid: nextAuthSession.user.email || "",
   };
