@@ -36,7 +36,7 @@ function getUserType(role: string): string {
 
 /**
  * Find or create a user in Zendesk (for OAuth flows)
- * Used when users sign in with Google or other OAuth providers
+ * Used when users sign in with Zendesk OAuth
  */
 export async function findOrCreateZendeskUser(name: string, email: string) {
   try {

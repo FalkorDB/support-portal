@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import GoogleSignInButton from "@/components/GoogleSignInButton";
+import ZendeskSignInButton from "@/components/ZendeskSignInButton";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -23,20 +23,16 @@ function LoginForm() {
             Support Portal
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in or create an account with Google
+            Sign in to access your support cases
           </p>
         </div>
 
-        {/* Google Sign-In */}
-        <div className="mt-8">
-          <GoogleSignInButton
+        {/* Sign-In Options */}
+        <div className="mt-8 space-y-4">
+          <ZendeskSignInButton
             callbackUrl={searchParams.get("from") || "/dashboard"}
-            text="Sign in with Google"
+            text="Sign in with Zendesk"
           />
-
-          <p className="mt-4 text-center text-xs text-gray-500">
-            New users will be automatically registered on first sign-in
-          </p>
         </div>
       </div>
     </div>
