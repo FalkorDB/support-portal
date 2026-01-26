@@ -1,25 +1,50 @@
 /**
  * NextAuth Configuration
- * Handles Google OAuth and session management
+ * Handles Zendesk OAuth and session management
  */
 
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    {
+      id: "zendesk",
+      name: "Zendesk",
+      type: "oauth",
+      clientId: process.env.ZENDESK_OAUTH_CLIENT_ID!,
+      clientSecret: process.env.ZENDESK_OAUTH_CLIENT_SECRET!,
       authorization: {
+        url: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`,
         params: {
-          prompt: "consent",
-          access_type: "offline",
           response_type: "code",
+          scope: "read write",
         },
       },
-    }),
+      token: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens`,
+      userinfo: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/users/me.json`,
+      profile(profile: {
+        user: {
+          id: number;
+          name: string;
+          email: string;
+          photo?: { content_url: string };
+          role: string;
+        };
+      }) {
+        return {
+          id: profile.user.id,
+          name: profile.user.name,
+          email: profile.user.email,
+          image: profile.user.photo?.content_url || null,
+          role: profile.user.role,
+          type:
+            profile.user.role === "agent" || profile.user.role === "admin"
+              ? "agent"
+              : "end-user",
+        };
+      },
+    },
   ],
   pages: {
     signIn: "/login",
@@ -27,12 +52,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      // When a user signs in with Google, we need to:
+      // When a user signs in, we need to:
       // 1. Check if they exist in Zendesk
       // 2. If not, create them as an end-user
       // 3. Store their Zendesk user ID in the session
 
-      if (account?.provider === "google" && user.email) {
+      if (account?.provider === "zendesk" && user.email) {
         try {
           // Import dynamically to avoid circular dependencies
           const { findOrCreateZendeskUser } = await import("@/lib/zendesk");
