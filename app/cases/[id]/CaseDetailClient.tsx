@@ -155,7 +155,11 @@ export default function CaseDetailClient({
                 value={currentStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
                 disabled={isUpdatingStatus || currentStatus === "closed"}
-                title={currentStatus === "closed" ? "Closed tickets cannot be reopened" : ""}
+                title={
+                  currentStatus === "closed"
+                    ? "Closed tickets cannot be reopened"
+                    : ""
+                }
                 className={`inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium ${getStatusColor(
                   currentStatus,
                 )} cursor-pointer appearance-none pr-8 disabled:cursor-not-allowed disabled:opacity-50`}

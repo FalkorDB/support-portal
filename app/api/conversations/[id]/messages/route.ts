@@ -40,7 +40,11 @@ export async function GET(
 
     // Check rate limit
     const rateLimitId = getRateLimitIdentifier(request, session.user.id);
-    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.general, "general");
+    const rateLimit = checkRateLimit(
+      rateLimitId,
+      RATE_LIMITS.general,
+      "general",
+    );
 
     if (!rateLimit.allowed) {
       const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);
@@ -121,7 +125,11 @@ export async function POST(
 
     // Check rate limit
     const rateLimitId = getRateLimitIdentifier(request, session.user.id);
-    const rateLimit = checkRateLimit(rateLimitId, RATE_LIMITS.sendMessage, "sendMessage");
+    const rateLimit = checkRateLimit(
+      rateLimitId,
+      RATE_LIMITS.sendMessage,
+      "sendMessage",
+    );
 
     if (!rateLimit.allowed) {
       const retryAfter = Math.ceil((rateLimit.remainingTime || 0) / 1000);
