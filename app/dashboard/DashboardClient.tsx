@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -20,7 +19,6 @@ export default function DashboardClient({
   user,
   error,
 }: DashboardClientProps) {
-  const router = useRouter();
   const [conversations] = useState<Conversation[]>(initialConversations);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");

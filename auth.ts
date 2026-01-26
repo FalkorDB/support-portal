@@ -23,14 +23,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       token: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens`,
       userinfo: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/users/me.json`,
-      profile(profile: any) {
+      profile(profile: {
+        user: {
+          id: number;
+          name: string;
+          email: string;
+          photo?: { content_url: string };
+          role: string;
+        };
+      }) {
         return {
           id: profile.user.id,
           name: profile.user.name,
           email: profile.user.email,
           image: profile.user.photo?.content_url || null,
           role: profile.user.role,
-          type: profile.user.role === "agent" || profile.user.role === "admin" ? "agent" : "end-user",
+          type:
+            profile.user.role === "agent" || profile.user.role === "admin"
+              ? "agent"
+              : "end-user",
         };
       },
     },
@@ -46,7 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // 2. If not, create them as an end-user
       // 3. Store their Zendesk user ID in the session
 
-      if ((account?.provider === "zendesk") && user.email) {
+      if (account?.provider === "zendesk" && user.email) {
         try {
           // Import dynamically to avoid circular dependencies
           const { findOrCreateZendeskUser } = await import("@/lib/zendesk");
