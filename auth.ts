@@ -94,13 +94,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         type?: string;
       };
 
-      if (token.id !== undefined && token.id !== null) {
+      if (token.id != null) {
         extendedUser.id = token.id as number;
       }
-      if (token.role !== undefined && token.role !== null) {
+      if (token.role != null) {
         extendedUser.role = token.role as string;
       }
-      if (token.type !== undefined && token.type !== null) {
+      if (token.type != null) {
         extendedUser.type = token.type as string;
       }
 
