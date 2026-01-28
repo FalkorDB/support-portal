@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -19,6 +20,7 @@ export default function DashboardClient({
   user,
   error,
 }: DashboardClientProps) {
+  const router = useRouter();
   const [conversations] = useState<Conversation[]>(initialConversations);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -30,8 +32,8 @@ export default function DashboardClient({
     try {
       // Use redirect: false to ensure session is fully cleared before navigation
       await signOut({ redirect: false });
-      // Manually redirect to login after session is cleared
-      window.location.href = "/login";
+      // Use Next.js router for navigation after session is cleared
+      router.push("/login");
     } catch (err) {
       console.error("Logout failed:", err);
       setIsLoggingOut(false);
