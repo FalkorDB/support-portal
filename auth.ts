@@ -20,7 +20,7 @@ const missingVars = Object.entries(requiredEnvVars)
 if (missingVars.length > 0) {
   throw new Error(
     `Missing required environment variables: ${missingVars.join(", ")}. ` +
-      `Please check your .env file or environment configuration.`
+      `Please check your .env file or environment configuration.`,
   );
 }
 
