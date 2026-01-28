@@ -95,14 +95,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         type?: string;
       };
 
-      if (token.id !== undefined) {
-        extendedUser.id = token.id;
+      if (token.id != null) {
+        extendedUser.id = token.id as number;
       }
-      if (token.role !== undefined) {
-        extendedUser.role = token.role;
+      if (token.role != null) {
+        extendedUser.role = token.role as string;
       }
-      if (token.type !== undefined) {
-        extendedUser.type = token.type;
+      if (token.type != null) {
+        extendedUser.type = token.type as string;
       }
 
       if (token.accessToken) {
