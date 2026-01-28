@@ -28,7 +28,10 @@ export default function DashboardClient({
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await signOut({ callbackUrl: "/login", redirect: true });
+      // Use redirect: false to ensure session is fully cleared before navigation
+      await signOut({ redirect: false });
+      // Manually redirect to login after session is cleared
+      window.location.href = "/login";
     } catch (err) {
       console.error("Logout failed:", err);
       setIsLoggingOut(false);

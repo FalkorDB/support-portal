@@ -19,6 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         params: {
           response_type: "code",
           scope: "read write",
+          prompt: "login",
         },
       },
       token: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens`,
