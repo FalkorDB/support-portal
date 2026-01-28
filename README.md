@@ -17,7 +17,7 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 ## Screenshots
 
 ### Sign In
-<img src="https://github.com/user-attachments/assets/5e01eccf-0814-45b2-a215-7c71b0bfb10a" alt="Sign in with Zendesk" width="800">
+<img src="https://github.com/user-attachments/assets/5e01eccf-0814-45b2-a215-7c71b0bfb10a" alt="Sign In Screen" width="800">
 
 ### Authentication
 <img src="https://github.com/user-attachments/assets/5f318501-b4c0-4228-bd3d-22c0df5abf25" alt="Authentication Screen" width="800">
