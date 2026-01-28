@@ -105,8 +105,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (token.accessToken) {
-        (session as { accessToken?: string }).accessToken =
-          token.accessToken;
+        (session as { accessToken?: string }).accessToken = token.accessToken;
       }
 
       return session;
