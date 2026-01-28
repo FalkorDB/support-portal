@@ -227,7 +227,7 @@ export async function addComment(
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Zendesk add comment error:", response.status, errorText);
-      let errorMessage = "Failed to add comment";
+      let errorMessage;
       try {
         const errorData = JSON.parse(errorText);
         errorMessage = JSON.stringify(errorData);
