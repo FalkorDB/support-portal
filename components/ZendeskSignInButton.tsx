@@ -17,7 +17,7 @@ export default function ZendeskSignInButton({
 
   const handleSignIn = async () => {
     if (isLoading) return; // Prevent multiple clicks
-    
+
     setIsLoading(true);
     try {
       await signIn("zendesk", { callbackUrl });
