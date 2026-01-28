@@ -17,15 +17,19 @@ A modern customer-facing support portal that integrates with Zendesk to allow us
 ## Screenshots
 
 ### Sign In
+
 <img src="https://github.com/user-attachments/assets/5e01eccf-0814-45b2-a215-7c71b0bfb10a" alt="Sign In Screen" width="800">
 
 ### Authentication
+
 <img src="https://github.com/user-attachments/assets/5f318501-b4c0-4228-bd3d-22c0df5abf25" alt="Authentication Screen" width="800">
 
 ### Support Cases Dashboard
+
 <img src="https://github.com/user-attachments/assets/da0afcee-607d-4c79-b389-ced590f12a79" alt="Support Cases Dashboard" width="800">
 
 ### Case Details
+
 <img src="https://github.com/user-attachments/assets/e05f8e2a-d88d-4625-9b70-59b45ebc22ea" alt="Case Details View" width="800">
 
 ## Tech Stack
