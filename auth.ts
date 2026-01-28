@@ -5,6 +5,29 @@
 
 import NextAuth from "next-auth";
 
+// Validate required environment variables
+const requiredEnvVars = {
+  ZENDESK_SUBDOMAIN: process.env.ZENDESK_SUBDOMAIN,
+  ZENDESK_OAUTH_CLIENT_ID: process.env.ZENDESK_OAUTH_CLIENT_ID,
+  ZENDESK_OAUTH_CLIENT_SECRET: process.env.ZENDESK_OAUTH_CLIENT_SECRET,
+  AUTH_SECRET: process.env.AUTH_SECRET || process.env.SESSION_SECRET,
+};
+
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  throw new Error(
+    `Missing required environment variables: ${missingVars.join(", ")}. ` +
+      `Please check your .env file or environment configuration.`
+  );
+}
+
+const zendeskSubdomain = requiredEnvVars.ZENDESK_SUBDOMAIN!;
+const zendeskClientId = requiredEnvVars.ZENDESK_OAUTH_CLIENT_ID!;
+const zendeskClientSecret = requiredEnvVars.ZENDESK_OAUTH_CLIENT_SECRET!;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
@@ -12,17 +35,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       id: "zendesk",
       name: "Zendesk",
       type: "oauth",
-      clientId: process.env.ZENDESK_OAUTH_CLIENT_ID!,
-      clientSecret: process.env.ZENDESK_OAUTH_CLIENT_SECRET!,
+      clientId: zendeskClientId,
+      clientSecret: zendeskClientSecret,
       authorization: {
-        url: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`,
+        url: `https://${zendeskSubdomain}.zendesk.com/oauth/authorizations/new`,
         params: {
           response_type: "code",
           scope: "read write",
         },
       },
-      token: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens`,
-      userinfo: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/users/me.json`,
+      token: {
+        url: `https://${zendeskSubdomain}.zendesk.com/oauth/tokens`,
+      },
+      userinfo: {
+        url: `https://${zendeskSubdomain}.zendesk.com/api/v2/users/me.json`,
+      },
       profile(profile: {
         user: {
           id: number;
