@@ -14,7 +14,7 @@ const requiredEnvVars = {
 };
 
 const missingVars = Object.entries(requiredEnvVars)
-  .filter(([_, value]) => !value)
+  .filter(([, value]) => !value)
   .map(([key]) => key);
 
 if (missingVars.length > 0) {
@@ -93,15 +93,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in
       if (user) {
-        // Safely convert user.id to number with validation
-        const userId =
-          typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
-        if (isNaN(userId)) {
-          console.error("Invalid user ID:", user.id);
-          throw new Error("Invalid user ID in JWT callback");
-        }
-
-        token.id = userId;
+        // In NextAuth v5, user.id is set by the provider and can be a string (UUID)
+        // Store it as-is rather than trying to parse as number
+        token.id = String(user.id);
         token.role = user.role;
         token.type = user.type;
       }
@@ -117,13 +111,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add custom fields to session
       // Create a properly typed extended user object to avoid repetitive type assertions
       const extendedUser = session.user as {
-        id?: number;
+        id?: string;
         role?: string;
         type?: string;
       };
 
       if (token.id != null) {
-        extendedUser.id = token.id as number;
+        extendedUser.id = token.id as string;
       }
       if (token.role != null) {
         extendedUser.role = token.role as string;

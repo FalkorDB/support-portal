@@ -20,13 +20,28 @@ export default function ZendeskSignInButton({
 
     setIsLoading(true);
     try {
-      await signIn("zendesk", { callbackUrl });
+      const result = await signIn("zendesk", {
+        callbackUrl,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.error("Sign-in error:", result.error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (result?.url) {
+        window.location.href = result.url;
+      } else {
+        // No redirect URL provided; reset loading so the user can retry.
+        setIsLoading(false);
+      }
     } catch (error) {
-      // Reset loading state on error so user can retry
-      console.error("Sign-in error:", error);
+      // Handle unexpected errors (e.g., network or internal issues)
+      console.error("Sign-in unexpected error:", error);
       setIsLoading(false);
     }
-    // Note: On success, user will be redirected, so no need to reset loading state
   };
 
   return (
