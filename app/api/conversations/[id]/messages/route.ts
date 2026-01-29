@@ -84,7 +84,7 @@ export async function GET(
         content: comment.body || comment.html_body,
         created_at: createdAt,
         message_type: comment.public
-          ? comment.author_id === session.user.id
+          ? String(comment.author_id) === session.user.id
             ? "outgoing"
             : "incoming"
           : "activity",
@@ -92,7 +92,7 @@ export async function GET(
           id: comment.author_id,
           name: "User",
           type:
-            comment.author_id === session.user.id ? session.user.type : "user",
+            String(comment.author_id) === session.user.id ? session.user.type : "user",
         },
       };
     });
