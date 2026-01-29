@@ -183,7 +183,7 @@ export async function fetchTicket(
 export async function addComment(
   ticketId: number,
   body: string,
-  userId: number,
+  userId: string | number,
   accessToken: string,
   userRole: string,
   isPublic: boolean = true,
@@ -257,7 +257,7 @@ export async function addComment(
 export async function createTicket(
   subject: string,
   description: string,
-  userId: number,
+  userId: string | number,
   accessToken: string,
   userRole: string,
   priority: string = "normal",
