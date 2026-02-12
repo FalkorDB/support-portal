@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Conversation, Message, User } from "@/types";
 import { formatDateTime, getStatusColor } from "@/lib/utils";
+import { htmlToPlainText } from "@/lib/validation";
+import RichTextEditor from "@/components/RichTextEditor";
+import SafeHtmlContent from "@/components/SafeHtmlContent";
 
 interface CaseDetailClientProps {
   conversation: Conversation;
@@ -50,6 +53,7 @@ export default function CaseDetailClient({
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState("");
+  const [editorKey, setEditorKey] = useState(0);
   const [currentStatus, setCurrentStatus] = useState(conversation.status);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState("");
@@ -121,7 +125,7 @@ export default function CaseDetailClient({
   const handleSendMessage = async (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
 
-    if (!newMessage.trim()) return;
+    if (!htmlToPlainText(newMessage)) return;
 
     setIsSending(true);
     setSendError("");
@@ -147,6 +151,7 @@ export default function CaseDetailClient({
       // Add message to list
       setMessages([...messages, sentMessage]);
       setNewMessage("");
+      setEditorKey((k) => k + 1);
 
       // Refresh to get updated conversation
       router.refresh();
@@ -312,9 +317,10 @@ export default function CaseDetailClient({
                           ) : null}
                         </p>
                       )}
-                      <p className="whitespace-pre-wrap break-words text-sm">
-                        {message.content}
-                      </p>
+                      <SafeHtmlContent
+                        html={message.content || ""}
+                        className="break-words text-sm [&_p]:mb-1 [&_p:last-child]:mb-0"
+                      />
                       <p
                         className={`mt-2 text-xs ${
                           isFromUser ? "text-blue-100" : "text-gray-500"
@@ -371,23 +377,19 @@ export default function CaseDetailClient({
           )}
 
           <form onSubmit={handleSendMessage} className="flex gap-3">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && e.ctrlKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
+            <RichTextEditor
+              key={editorKey}
+              content={newMessage}
+              onChange={setNewMessage}
               placeholder="Type your message..."
-              rows={3}
+              minHeight="80px"
               disabled={isSending}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+              onCtrlEnter={() => handleSendMessage()}
+              className="flex-1"
             />
             <button
               type="submit"
-              disabled={isSending || !newMessage.trim()}
+              disabled={isSending || !htmlToPlainText(newMessage)}
               className="self-end rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSending ? (

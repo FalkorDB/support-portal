@@ -5,6 +5,22 @@
 
 import { z } from "zod";
 
+/**
+ * Extract plain text from HTML for length validation.
+ * Strips all HTML tags and decodes common entities.
+ */
+export function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .trim();
+}
+
 // Ticket/Case creation validation
 export const createTicketSchema = z.object({
   subject: z
@@ -14,9 +30,16 @@ export const createTicketSchema = z.object({
     .trim(),
   description: z
     .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(5000, "Description must not exceed 5000 characters")
-    .trim(),
+    .max(50000, "Description is too large")
+    .trim()
+    .refine(
+      (val) => htmlToPlainText(val).length >= 10,
+      "Description must be at least 10 characters",
+    )
+    .refine(
+      (val) => htmlToPlainText(val).length <= 5000,
+      "Description must not exceed 5000 characters",
+    ),
   priority: z
     .enum(["low", "normal", "high", "urgent"])
     .optional()
@@ -27,9 +50,16 @@ export const createTicketSchema = z.object({
 export const createMessageSchema = z.object({
   content: z
     .string()
-    .min(1, "Message cannot be empty")
-    .max(5000, "Message must not exceed 5000 characters")
-    .trim(),
+    .max(50000, "Message is too large")
+    .trim()
+    .refine(
+      (val) => htmlToPlainText(val).length >= 1,
+      "Message cannot be empty",
+    )
+    .refine(
+      (val) => htmlToPlainText(val).length <= 5000,
+      "Message must not exceed 5000 characters",
+    ),
 });
 
 // Ticket status update validation

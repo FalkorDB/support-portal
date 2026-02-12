@@ -6,6 +6,7 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { Conversation, User } from "@/types";
 import { formatDate, getStatusColor } from "@/lib/utils";
+import { htmlToPlainText } from "@/lib/validation";
 import NewCaseModal from "./NewCaseModal";
 
 interface DashboardClientProps {
@@ -226,10 +227,11 @@ export default function DashboardClient({
           <div className="space-y-4">
             {filteredConversations.map((conversation) => {
               // Get message preview from last_non_activity_message (subject) or messages
-              const messagePreview =
+              const rawPreview =
                 conversation.last_non_activity_message?.content ||
                 conversation.messages?.[0]?.content ||
                 "No messages yet";
+              const messagePreview = htmlToPlainText(rawPreview);
 
               return (
                 <Link

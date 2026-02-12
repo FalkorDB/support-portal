@@ -79,7 +79,7 @@ export default async function CaseDetailPage({
 
       return {
         id: comment.id,
-        content: comment.body || comment.html_body,
+        content: comment.html_body || comment.body,
         created_at: createdAt,
         message_type: comment.public
           ? isCurrentUser
