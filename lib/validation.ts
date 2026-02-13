@@ -7,17 +7,12 @@ import { z } from "zod";
 
 /**
  * Extract plain text from HTML for length validation.
- * Strips all HTML tags and decodes common entities.
+ * Strips HTML tags without decoding entities.
  */
 export function htmlToPlainText(html: string): string {
   return html
-    .replace(/<[^>]*>/g, "")
+    .replace(/<[^<>]*>/g, "")
     .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#x27;/g, "'")
     .trim();
 }
 

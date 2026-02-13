@@ -13,7 +13,7 @@ const SANITIZE_CONFIG = {
     "span", "div", "ul", "ol", "li", "a", "blockquote",
     "h1", "h2", "h3", "h4", "h5", "h6",
   ],
-  ALLOWED_ATTR: ["style", "href", "target", "rel"],
+  ALLOWED_ATTR: ["style", "href"],
 } satisfies DOMPurify.Config;
 
 export default function SafeHtmlContent({ html, className }: SafeHtmlContentProps) {
