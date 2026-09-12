@@ -84,7 +84,7 @@ export function checkRateLimit(
  */
 export function getRateLimitIdentifier(
   request: Request,
-  userId?: number,
+  userId?: string | number,
 ): string {
   if (userId) {
     return `user:${userId}`;

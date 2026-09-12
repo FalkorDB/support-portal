@@ -1,6 +1,6 @@
 // User and Authentication Types
 export interface User {
-  id: number;
+  id: string;
   email: string;
   name: string;
   role?: string;

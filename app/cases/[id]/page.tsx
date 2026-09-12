@@ -73,7 +73,7 @@ export default async function CaseDetailPage({
       const author = userMap.get(comment.author_id || 0);
       // Note: session.user.id might be a different ID format, so we compare names as fallback
       const isCurrentUser =
-        comment.author_id === session.user.id ||
+        String(comment.author_id) === session.user.id ||
         (author?.name === session.user.name && author?.agent === false);
       const isAgent = author?.agent === true;
 

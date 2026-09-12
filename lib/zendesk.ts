@@ -23,7 +23,7 @@ function getOAuthHeader(accessToken: string): string {
 
 /**
  * Fetch tickets for a specific user
- * @param userId - The user's Zendesk ID
+ * @param userId - The user's Zendesk ID (not used in OAuth flow, kept for signature compatibility)
  * @param userRole - The user's role (end-user or agent)
  * @param accessToken - OAuth access token from the user's session
  *
@@ -32,7 +32,7 @@ function getOAuthHeader(accessToken: string): string {
  * agents see tickets they have access to.
  */
 export async function fetchUserTickets(
-  userId: number,
+  userId: string | number,
   userRole: string,
   accessToken: string,
 ) {
@@ -183,7 +183,7 @@ export async function fetchTicket(
 export async function addComment(
   ticketId: number,
   body: string,
-  userId: number,
+  userId: string | number,
   accessToken: string,
   userRole: string,
   isPublic: boolean = true,
@@ -257,7 +257,7 @@ export async function addComment(
 export async function createTicket(
   subject: string,
   description: string,
-  userId: number,
+  userId: string | number,
   accessToken: string,
   userRole: string,
   priority: string = "normal",

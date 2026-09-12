@@ -5,6 +5,29 @@
 
 import NextAuth from "next-auth";
 
+// Validate required environment variables
+const requiredEnvVars = {
+  ZENDESK_SUBDOMAIN: process.env.ZENDESK_SUBDOMAIN,
+  ZENDESK_OAUTH_CLIENT_ID: process.env.ZENDESK_OAUTH_CLIENT_ID,
+  ZENDESK_OAUTH_CLIENT_SECRET: process.env.ZENDESK_OAUTH_CLIENT_SECRET,
+  AUTH_SECRET: process.env.AUTH_SECRET || process.env.SESSION_SECRET,
+};
+
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  throw new Error(
+    `Missing required environment variables: ${missingVars.join(", ")}. ` +
+      `Please check your .env file or environment configuration.`,
+  );
+}
+
+const zendeskSubdomain = requiredEnvVars.ZENDESK_SUBDOMAIN!;
+const zendeskClientId = requiredEnvVars.ZENDESK_OAUTH_CLIENT_ID!;
+const zendeskClientSecret = requiredEnvVars.ZENDESK_OAUTH_CLIENT_SECRET!;
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
@@ -12,18 +35,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       id: "zendesk",
       name: "Zendesk",
       type: "oauth",
-      clientId: process.env.ZENDESK_OAUTH_CLIENT_ID!,
-      clientSecret: process.env.ZENDESK_OAUTH_CLIENT_SECRET!,
+      clientId: zendeskClientId,
+      clientSecret: zendeskClientSecret,
       authorization: {
-        url: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/authorizations/new`,
+        url: `https://${zendeskSubdomain}.zendesk.com/oauth/authorizations/new`,
         params: {
           response_type: "code",
           scope: "read write",
           prompt: "login",
         },
       },
-      token: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens`,
-      userinfo: `https://${process.env.ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/users/me.json`,
+      token: {
+        url: `https://${zendeskSubdomain}.zendesk.com/oauth/tokens`,
+      },
+      userinfo: {
+        url: `https://${zendeskSubdomain}.zendesk.com/api/v2/users/me.json`,
+      },
       profile(profile: {
         user: {
           id: number;
@@ -66,15 +93,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       // Initial sign in
       if (user) {
-        // Safely convert user.id to number with validation
-        const userId =
-          typeof user.id === "number" ? user.id : parseInt(String(user.id), 10);
-        if (isNaN(userId)) {
-          console.error("Invalid user ID:", user.id);
-          throw new Error("Invalid user ID in JWT callback");
-        }
-
-        token.id = userId;
+        // In NextAuth v5, user.id is set by the provider and can be a string (UUID)
+        // Store it as-is rather than trying to parse as number
+        token.id = String(user.id);
         token.role = user.role;
         token.type = user.type;
       }
@@ -90,13 +111,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Add custom fields to session
       // Create a properly typed extended user object to avoid repetitive type assertions
       const extendedUser = session.user as {
-        id?: number;
+        id?: string;
         role?: string;
         type?: string;
       };
 
       if (token.id != null) {
-        extendedUser.id = token.id as number;
+        extendedUser.id = token.id as string;
       }
       if (token.role != null) {
         extendedUser.role = token.role as string;
