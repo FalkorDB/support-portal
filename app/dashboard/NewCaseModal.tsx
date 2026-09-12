@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface NewCaseModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export default function NewCaseModal({
   const [priority, setPriority] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [editorKey, setEditorKey] = useState(0);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,6 +48,7 @@ export default function NewCaseModal({
       setSubject("");
       setDescription("");
       setPriority("");
+      setEditorKey((k) => k + 1);
 
       // Call success callback
       onSuccess();
@@ -135,14 +138,14 @@ export default function NewCaseModal({
                   Please enter the details of your request. A member of our
                   support staff will respond as soon as possible.
                 </p>
-                <textarea
-                  id="description"
-                  required
-                  rows={8}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="mt-2 block w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                <RichTextEditor
+                  key={editorKey}
+                  content={description}
+                  onChange={setDescription}
+                  placeholder="Please enter the details of your request..."
+                  minHeight="200px"
                   disabled={isSubmitting}
+                  className="mt-2"
                 />
               </div>
 

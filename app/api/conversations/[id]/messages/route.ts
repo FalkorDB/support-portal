@@ -81,7 +81,7 @@ export async function GET(
 
       return {
         id: comment.id,
-        content: comment.body || comment.html_body,
+        content: comment.html_body || comment.body,
         created_at: createdAt,
         message_type: comment.public
           ? comment.author_id === session.user.id

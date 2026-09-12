@@ -201,14 +201,14 @@ export async function addComment(
         ? {
             request: {
               comment: {
-                body,
+                html_body: body,
               },
             },
           }
         : {
             ticket: {
               comment: {
-                body,
+                html_body: body,
                 public: isPublic,
                 author_id: userId,
               },
@@ -276,7 +276,7 @@ export async function createTicket(
             request: {
               subject,
               comment: {
-                body: description,
+                html_body: description,
               },
               priority,
             },
@@ -285,7 +285,7 @@ export async function createTicket(
             ticket: {
               subject,
               comment: {
-                body: description,
+                html_body: description,
               },
               requester_id: userId,
               priority,
